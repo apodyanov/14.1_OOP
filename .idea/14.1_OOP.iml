@@ -6,5 +6,6 @@
     </content>
     <orderEntry type="jdk" jdkName="Poetry (14.1_OOP)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="apk_1" />
   </component>
 </module>
