@@ -14,7 +14,7 @@ def sample_category(sample_product):
     return Category(
         "Смартфоны",
         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
-        [sample_product]
+        [sample_product],
     )
 
 
@@ -29,8 +29,9 @@ def test_product_initialization(sample_product):
 def test_category_initialization(sample_category):
     """Тест проверки инициализации объекта класса Category"""
     assert sample_category.name == "Смартфоны"
-    assert sample_category.description == ("Смартфоны, как средство не только коммуникации, "
-                                           "но и получения дополнительных функций для удобства жизни")
+    assert sample_category.description == (
+        "Смартфоны, как средство не только коммуникации, " "но и получения дополнительных функций для удобства жизни"
+    )
     assert len(sample_category.products) == 1
 
 
@@ -90,10 +91,10 @@ def test_category_products_are_product_objects(sample_category):
     # Также можно проверить, что у объектов есть все необходимые атрибуты Product
     if sample_category.products:
         product = sample_category.products[0]
-        assert hasattr(product, 'name')
-        assert hasattr(product, 'description')
-        assert hasattr(product, 'price')
-        assert hasattr(product, 'quantity')
+        assert hasattr(product, "name")
+        assert hasattr(product, "description")
+        assert hasattr(product, "price")
+        assert hasattr(product, "quantity")
 
 
 def test_add_product_to_category():
