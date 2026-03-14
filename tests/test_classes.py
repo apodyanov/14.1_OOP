@@ -1,5 +1,6 @@
 import pytest
-from main import Product, Category
+
+from main import Category, Product
 
 
 @pytest.fixture
@@ -13,7 +14,7 @@ def sample_category(sample_product):
     """Фикстура для создания тестовой категории"""
     category = Category(
         "Смартфоны",
-        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни"
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
     )
     category.add_product(sample_product)  # Используем новый метод add_product
     return category
@@ -22,12 +23,7 @@ def sample_category(sample_product):
 @pytest.fixture
 def product_data():
     """Фикстура с данными для создания продукта через класс-метод"""
-    return {
-        'name': 'Xiaomi Redmi Note 11',
-        'description': '1024GB, Синий',
-        'price': 31000.0,
-        'quantity': 14
-    }
+    return {"name": "Xiaomi Redmi Note 11", "description": "1024GB, Синий", "price": 31000.0, "quantity": 14}
 
 
 def test_product_initialization(sample_product):
@@ -79,10 +75,10 @@ def test_product_new_product_with_duplicate_check(product_data):
 
     # Создаем дубликат с более высокой ценой и дополнительным количеством
     duplicate_data = {
-        'name': 'Xiaomi Redmi Note 11',  # То же имя
-        'description': '1024GB, Красный',  # Другое описание
-        'price': 32000.0,  # Более высокая цена
-        'quantity': 5  # Дополнительное количество
+        "name": "Xiaomi Redmi Note 11",  # То же имя
+        "description": "1024GB, Красный",  # Другое описание
+        "price": 32000.0,  # Более высокая цена
+        "quantity": 5,  # Дополнительное количество
     }
 
     # Вызываем класс-метод с проверкой дубликатов
@@ -105,10 +101,10 @@ def test_product_new_product_with_lower_price_duplicate(product_data):
 
     # Создаем дубликат с меньшей ценой
     duplicate_data = {
-        'name': 'Xiaomi Redmi Note 11',
-        'description': '1024GB, Зеленый',
-        'price': 30000.0,  # Меньшая цена
-        'quantity': 3
+        "name": "Xiaomi Redmi Note 11",
+        "description": "1024GB, Зеленый",
+        "price": 30000.0,  # Меньшая цена
+        "quantity": 3,
     }
 
     result = Product.new_product(duplicate_data, existing_products)
@@ -128,7 +124,7 @@ def test_category_initialization(sample_category):
         "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни"
     )
     # Проверяем через геттер products
-    assert len(sample_category.products.split('\n')) == 1  # products возвращает строку
+    assert len(sample_category.products.split("\n")) == 1  # products возвращает строку
 
 
 def test_category_private_products_attribute(sample_category):
@@ -209,10 +205,10 @@ def test_product_count_with_duplicate_addition(product_data):
 
     # Пытаемся добавить дубликат через add_product_with_check
     duplicate_data = {
-        'name': 'Xiaomi Redmi Note 11',
-        'description': 'Другое описание',
-        'price': 32000.0,
-        'quantity': 5
+        "name": "Xiaomi Redmi Note 11",
+        "description": "Другое описание",
+        "price": 32000.0,
+        "quantity": 5,
     }
 
     # Используем специальный метод для добавления с проверкой
