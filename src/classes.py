@@ -20,10 +20,21 @@ class Category:
         """Метод для инициализации экземпляра класса Category"""
         self.name = name
         self.description = description
-        self.products = products if products is not None else []
+        # Приватный атрибут для списка товаров (начинается с __)
+        self.__products = products if products is not None else []
 
         # Увеличиваем счетчик категорий при создании нового объекта
         Category.category_count += 1
 
         # Увеличиваем счетчик товаров на количество товаров в категории
-        Category.product_count += len(self.products)
+        Category.product_count += len(self.__products)
+
+    def add_product(self, product: Product):
+        """Метод для добавления товара в категорию"""
+        self.__products.append(product)
+        # Увеличиваем общий счетчик товаров при добавлении нового продукта
+        Category.product_count += 1
+
+    def get_products(self):
+        """Метод для получения списка товаров (геттер)"""
+        return self.__products
