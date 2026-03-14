@@ -8,6 +8,27 @@ class Product:
         self.price = price
         self.quantity = quantity
 
+    # Задание 3
+    @classmethod
+    def new_product(cls, product_data: dict):
+        """
+        Класс-метод для создания нового продукта из словаря.
+
+        Args:
+            product_data: Словарь с данными о продукте, содержащий ключи:
+                         'name', 'description', 'price', 'quantity'
+
+        Returns:
+            Объект класса Product
+        """
+        # Создаем и возвращаем новый экземпляр класса Product
+        return cls(
+            name=product_data['name'],
+            description=product_data['description'],
+            price=product_data['price'],
+            quantity=product_data['quantity']
+        )
+
 
 class Category:
     """Класс для описания категории товаров"""
