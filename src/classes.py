@@ -35,6 +35,20 @@ class Category:
         # Увеличиваем общий счетчик товаров при добавлении нового продукта
         Category.product_count += 1
 
-    def get_products(self):
-        """Метод для получения списка товаров (геттер)"""
-        return self.__products
+    # Задание 1
+    # def get_products(self):
+    #     """Метод для получения списка товаров (геттер)"""
+    #     return self.__products
+
+    # Задание 2
+    @property
+    def products(self):
+        """
+        Геттер для получения списка товаров в отформатированном виде.
+        Возвращает строку с информацией о каждом товаре в формате:
+        "Название продукта, {price} руб. Остаток: {quantity} шт."
+        """
+        products_str = ""
+        for product in self.__products:
+            products_str += f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт.\n"
+        return products_str.strip()  # Убираем последний перенос строки
