@@ -224,4 +224,3 @@ class Category:
     def products_list(self):
         """Геттер для получения списка товаров (для внутреннего использования)"""
         return self.__products
-

@@ -1,6 +1,6 @@
-
 import pytest
-from src.classes import Product, Category, CategoryIterator
+
+from src.classes import Category, CategoryIterator, Product
 
 
 # Фикстуры для создания тестовых данных
@@ -74,16 +74,9 @@ class TestProduct:
         expected_total2 = 200.0 * 2 + 50.0 * 5  # 400 + 250 = 650
         assert total2 == expected_total2
 
-
-
     def test_new_product_creation(self):
         """Тест создания нового продукта через класс-метод"""
-        product_data = {
-            "name": "Новый продукт",
-            "description": "Новое описание",
-            "price": 500.0,
-            "quantity": 7
-        }
+        product_data = {"name": "Новый продукт", "description": "Новое описание", "price": 500.0, "quantity": 7}
 
         product = Product.new_product(product_data)
         assert product.name == "Новый продукт"
@@ -98,7 +91,7 @@ class TestProduct:
             "name": "Продукт 1",  # Совпадает с именем первого продукта из фикстуры
             "description": "Новое описание",
             "price": 150.0,  # Цена выше существующей
-            "quantity": 3
+            "quantity": 3,
         }
 
         # Создаем продукт с проверкой на дубликаты
@@ -115,7 +108,7 @@ class TestProduct:
             "name": "Продукт 2",  # Существующий продукт с ценой 200.0
             "description": "Новое описание",
             "price": 150.0,  # Цена ниже существующей
-            "quantity": 4
+            "quantity": 4,
         }
 
         product = Product.new_product(duplicate_data, sample_products)
@@ -176,7 +169,7 @@ class TestCategory:
             "name": "Совершенно новый продукт",
             "description": "Описание нового продукта",
             "price": 400.0,
-            "quantity": 2
+            "quantity": 2,
         }
 
         product = sample_category.add_product_with_check(product_data)
@@ -195,7 +188,7 @@ class TestCategory:
             "name": "Продукт 1",  # Существующий продукт
             "description": "Обновленное описание",
             "price": 250.0,  # Более высокая цена
-            "quantity": 3
+            "quantity": 3,
         }
 
         product = sample_category.add_product_with_check(product_data)
@@ -366,12 +359,7 @@ class TestIntegration:
         assert products_in_category[2].name == "Клавиатура"
 
         # Проверяем добавление с проверкой дубликатов
-        duplicate_data = {
-            "name": "Мышь",
-            "description": "Новая беспроводная мышь",
-            "price": 6000.0,
-            "quantity": 5
-        }
+        duplicate_data = {"name": "Мышь", "description": "Новая беспроводная мышь", "price": 6000.0, "quantity": 5}
 
         updated_product = category.add_product_with_check(duplicate_data)
         assert updated_product.quantity == 15  # 10 + 5
