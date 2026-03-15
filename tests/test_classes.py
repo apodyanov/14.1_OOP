@@ -397,17 +397,28 @@ class TestLegacyRequirements:
         p1 = Product("p1", "d1", 100, 5)
         p2 = Product("p2", "d2", 200, 3)
 
-        # Создаем категории
-        c1 = Category("c1", "d1", [p1, p2])
+        # Создаем первую категорию с продуктами
+        category1 = Category("category1", "description1", [p1, p2])
         assert Category.category_count == 1
         assert Category.product_count == 2  # 2 продукта в списке
+        assert len(category1.products_list) == 2  # Проверяем, что продукты действительно добавлены
 
-        c2 = Category("c2", "d2", [])
+        # Создаем вторую категорию без продуктов
+        category2 = Category("category2", "description2", [])
         assert Category.category_count == 2
         assert Category.product_count == 2  # Не изменилось
+        assert len(category2.products_list) == 0  # Проверяем, что категория пустая
 
-        c2.add_product(p1)
+        # Добавляем продукт во вторую категорию
+        category2.add_product(p1)
         assert Category.product_count == 3  # Увеличилось на 1
+        assert len(category2.products_list) == 1  # Проверяем, что продукт добавлен
+        assert category2.products_list[0] == p1  # Проверяем, что добавлен правильный продукт
+
+        # Проверяем, что первая категория не изменилась
+        assert len(category1.products_list) == 2
+        assert category1.products_list[0] == p1
+        assert category1.products_list[1] == p2
 
     def test_price_validation_legacy(self):
         """Тест валидации цены (старая функциональность)"""
