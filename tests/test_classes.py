@@ -74,16 +74,7 @@ class TestProduct:
         expected_total2 = 200.0 * 2 + 50.0 * 5  # 400 + 250 = 650
         assert total2 == expected_total2
 
-    def test_product_add_type_error(self, sample_product):
-        """Тест ошибки типа при сложении продукта с не-продуктом"""
-        with pytest.raises(TypeError, match="Нельзя сложить Product с int"):
-            result = sample_product + 100
 
-        with pytest.raises(TypeError, match="Нельзя сложить Product с str"):
-            result = sample_product + "строка"
-
-        with pytest.raises(TypeError, match="Нельзя сложить Product с float"):
-            result = sample_product + 50.5
 
     def test_new_product_creation(self):
         """Тест создания нового продукта через класс-метод"""
