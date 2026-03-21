@@ -98,6 +98,72 @@ class Product:
         )
 
 
+class Smartphone(Product):
+    """Новый класс наследник класса Product"""
+
+    def __init__(self, name: str, description: str, price: float, quantity: int,
+                 efficiency: str, model: str, memory: int, color: str):
+        """
+        Метод для инициализации экземпляра класса Smartphone
+
+        Args:
+            name: Название смартфона
+            description: Описание
+            price: Цена
+            quantity: Количество на складе
+            efficiency: Производительность (например, "высокая", "средняя")
+            model: Модель смартфона
+            memory: Объем встроенной памяти в ГБ
+            color: Цвет
+        """
+        # Вызываем конструктор родительского класса
+        super().__init__(name, description, price, quantity)
+        self.efficiency = efficiency
+        self.model = model
+        self.memory = memory
+        self.color = color
+
+    def __str__(self):
+        """
+        Магический метод для строкового представления смартфона.
+        Переопределяем метод родителя для добавления специфичной информации.
+        """
+        return (f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
+                f"Модель: {self.model}, Память: {self.memory}ГБ, Цвет: {self.color}")
+
+
+
+class LawnGrass(Product):
+    """Новый класс наследник класса Product"""
+    def __init__(self, name: str, description: str, price: float, quantity: int,
+                 country: str, germination_period: str, color: str):
+        """
+        Метод для инициализации экземпляра класса LawnGrass
+
+        Args:
+            name: Название травы
+            description: Описание
+            price: Цена
+            quantity: Количество на складе
+            country: Страна-производитель
+            germination_period: Срок прорастания (например, "7-14 дней")
+            color: Цвет
+        """
+        # Вызываем конструктор родительского класса
+        super().__init__(name, description, price, quantity)
+        self.country = country
+        self.germination_period = germination_period
+        self.color = color
+
+    def __str__(self):
+        """
+        Магический метод для строкового представления газонной травы.
+        Переопределяем метод родителя для добавления специфичной информации.
+        """
+        return (f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
+                f"Страна: {self.country}, Срок прорастания: {self.germination_period}, Цвет: {self.color}")
+
+
 class CategoryIterator:
     """
     Вспомогательный класс-итератор для перебора товаров в категории.
