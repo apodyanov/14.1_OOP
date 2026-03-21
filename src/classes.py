@@ -21,15 +21,28 @@ class Product:
         Возвращает общую стоимость всех товаров на складе:
         (self.price * self.quantity) + (other.price * other.quantity)
 
+        Важно: складывать можно только товары из одинаковых классов!
+
         Args:
             other: Другой объект класса Product для сложения
 
         Returns:
             float: Общая стоимость товаров на складе
+
+        Raises:
+            TypeError: Если other не является объектом класса Product
+                      или если объекты разных классов
         """
-        # Проверяем, что other является объектом класса Product
+        # Проверяем, что other является объектом класса Product (или его наследником)
         if not isinstance(other, Product):
             raise TypeError(f"Нельзя сложить Product с {type(other).__name__}")
+
+        # Проверяем, что оба объекта принадлежат к одному и тому же классу
+        if type(self) != type(other):
+            raise TypeError(
+                f"Нельзя складывать товары разных категорий: "
+                f"{type(self).__name__} и {type(other).__name__}"
+            )
 
         # Вычисляем общую стоимость
         total_cost = (self.price * self.quantity) + (other.price * other.quantity)
@@ -253,11 +266,45 @@ class Category:
         """
         return CategoryIterator(self)
 
-    def add_product(self, product: Product):
-        """Метод для добавления товара в категорию"""
+    def add_product(self, product):
+        """
+        Метод для добавления товара в категорию с проверкой типа.
+        Использует функции isinstance() и issubclass() для валидации.
+
+        Args:
+            product: Объект для добавления в категорию
+
+        Returns:
+            None
+
+        Raises:
+            TypeError: Если product не является экземпляром Product или его наследника
+        """
+        # Способ 1: Используем isinstance для проверки принадлежности к иерархии Product
+        # isinstance() возвращает True, если объект является экземпляром указанного класса
+        # или любого его наследника
+        if not isinstance(product, Product):
+            raise TypeError(
+                f"Можно добавлять только объекты класса Product или его наследников. "
+                f"Получен объект типа: {type(product).__name__}"
+            )
+
+        # Способ 2: Дополнительная проверка с использованием issubclass
+        # issubclass() проверяет, является ли класс наследником другого класса
+        # Это альтернативный способ проверки, который можно использовать
+        if not issubclass(type(product), Product):
+            raise TypeError(
+                f"Класс {type(product).__name__} не является наследником Product"
+            )
+
+        # Если обе проверки пройдены, добавляем продукт
         self.__products.append(product)
         # Увеличиваем общий счетчик товаров при добавлении нового продукта
         Category.product_count += 1
+
+        # Выводим информацию об успешном добавлении
+        print(f"✓ Продукт '{product.name}' успешно добавлен в категорию '{self.name}'")
+
 
     def add_product_with_check(self, product_data: dict):
         """
