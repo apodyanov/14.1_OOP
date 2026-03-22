@@ -1,7 +1,6 @@
 import pytest
 
-
-from src.classes import Smartphone, LawnGrass, Product, Category
+from src.classes import Category, LawnGrass, Product, Smartphone
 
 
 @pytest.fixture
@@ -38,7 +37,7 @@ def sample_smartphone():
         "высокая",
         "iPhone 15 Pro",
         256,
-        "черный"
+        "черный",
     )
 
 
@@ -46,13 +45,7 @@ def sample_smartphone():
 def sample_lawn_grass():
     """Фикстура для создания тестовой газонной травы"""
     return LawnGrass(
-        "Газонная трава премиум",
-        "Смесь для идеального газона",
-        1500.0,
-        20,
-        "Голландия",
-        "10-14 дней",
-        "зеленый"
+        "Газонная трава премиум", "Смесь для идеального газона", 1500.0, 20, "Голландия", "10-14 дней", "зеленый"
     )
 
 
@@ -67,6 +60,7 @@ def sample_category_with_mixed_products(sample_product, sample_smartphone, sampl
 
 
 # ==================== СУЩЕСТВУЮЩИЕ ТЕСТЫ ====================
+
 
 def test_product_initialization(sample_product):
     """Тест проверки инициализации объекта класса Product"""
@@ -286,6 +280,7 @@ def test_add_product_to_category():
 
 # ==================== НОВЫЕ ТЕСТЫ ДЛЯ SMARTSPHONE ====================
 
+
 def test_smartphone_initialization(sample_smartphone):
     """Тест проверки инициализации объекта класса Smartphone"""
     assert sample_smartphone.name == "iPhone 15 Pro"
@@ -308,11 +303,13 @@ def test_smartphone_inheritance(sample_smartphone):
 
 def test_smartphone_str_method(sample_smartphone):
     """Тест проверки строкового представления смартфона"""
-    expected_str = (f"{sample_smartphone.name}, {sample_smartphone.price} руб. "
-                    f"Остаток: {sample_smartphone.quantity} шт. "
-                    f"Модель: {sample_smartphone.model}, "
-                    f"Память: {sample_smartphone.memory}ГБ, "
-                    f"Цвет: {sample_smartphone.color}")
+    expected_str = (
+        f"{sample_smartphone.name}, {sample_smartphone.price} руб. "
+        f"Остаток: {sample_smartphone.quantity} шт. "
+        f"Модель: {sample_smartphone.model}, "
+        f"Память: {sample_smartphone.memory}ГБ, "
+        f"Цвет: {sample_smartphone.color}"
+    )
     assert str(sample_smartphone) == expected_str
 
 
@@ -328,6 +325,7 @@ def test_smartphone_price_property(sample_smartphone):
 
 
 # ==================== НОВЫЕ ТЕСТЫ ДЛЯ LAWNSGRASS ====================
+
 
 def test_lawn_grass_initialization(sample_lawn_grass):
     """Тест проверки инициализации объекта класса LawnGrass"""
@@ -350,15 +348,18 @@ def test_lawn_grass_inheritance(sample_lawn_grass):
 
 def test_lawn_grass_str_method(sample_lawn_grass):
     """Тест проверки строкового представления газонной травы"""
-    expected_str = (f"{sample_lawn_grass.name}, {sample_lawn_grass.price} руб. "
-                    f"Остаток: {sample_lawn_grass.quantity} шт. "
-                    f"Страна: {sample_lawn_grass.country}, "
-                    f"Срок прорастания: {sample_lawn_grass.germination_period}, "
-                    f"Цвет: {sample_lawn_grass.color}")
+    expected_str = (
+        f"{sample_lawn_grass.name}, {sample_lawn_grass.price} руб. "
+        f"Остаток: {sample_lawn_grass.quantity} шт. "
+        f"Страна: {sample_lawn_grass.country}, "
+        f"Срок прорастания: {sample_lawn_grass.germination_period}, "
+        f"Цвет: {sample_lawn_grass.color}"
+    )
     assert str(sample_lawn_grass) == expected_str
 
 
 # ==================== НОВЫЕ ТЕСТЫ ДЛЯ МАГИЧЕСКОГО МЕТОДА __add__ ====================
+
 
 def test_product_add_same_class():
     """Тест проверки сложения продуктов одного класса"""
@@ -374,14 +375,7 @@ def test_product_add_same_class():
 def test_smartphone_add_same_class(sample_smartphone):
     """Тест проверки сложения смартфонов одного класса"""
     smartphone2 = Smartphone(
-        "Samsung Galaxy S24",
-        "Флагманский смартфон",
-        89999.0,
-        3,
-        "высокая",
-        "Galaxy S24",
-        256,
-        "фиолетовый"
+        "Samsung Galaxy S24", "Флагманский смартфон", 89999.0, 3, "высокая", "Galaxy S24", 256, "фиолетовый"
     )
 
     result = sample_smartphone + smartphone2
@@ -393,13 +387,7 @@ def test_smartphone_add_same_class(sample_smartphone):
 def test_lawn_grass_add_same_class(sample_lawn_grass):
     """Тест проверки сложения газонной травы одного класса"""
     lawn_grass2 = LawnGrass(
-        "Газонная трава стандарт",
-        "Обычная смесь",
-        800.0,
-        30,
-        "Россия",
-        "14-21 дней",
-        "светло-зеленый"
+        "Газонная трава стандарт", "Обычная смесь", 800.0, 30, "Россия", "14-21 дней", "светло-зеленый"
     )
 
     result = sample_lawn_grass + lawn_grass2
@@ -439,6 +427,7 @@ def test_add_with_non_product_raises_error(sample_product):
 
 
 # ==================== НОВЫЕ ТЕСТЫ ДЛЯ ЗАЩИЩЕННОГО ADD_PRODUCT ====================
+
 
 def test_add_product_with_valid_products():
     """Тест проверки добавления корректных продуктов в категорию"""
@@ -516,6 +505,7 @@ def test_add_product_with_issubclass_check():
 
 
 # ==================== НОВЫЕ ТЕСТЫ ДЛЯ КАТЕГОРИЙ С НАСЛЕДНИКАМИ ====================
+
 
 def test_category_with_smartphones():
     """Тест проверки категории, содержащей только смартфоны"""
@@ -600,6 +590,7 @@ def test_category_total_cost_with_mixed_products(sample_category_with_mixed_prod
 
 # ==================== ТЕСТЫ ДЛЯ ИТЕРАТОРА ====================
 
+
 def test_category_iterator(sample_category_with_mixed_products):
     """Тест проверки работы итератора категории"""
     category = sample_category_with_mixed_products
@@ -615,9 +606,8 @@ def test_category_iterator(sample_category_with_mixed_products):
         assert product.name == products_list[i].name
 
 
-
-
 # ==================== ТЕСТЫ ДЛЯ СЧЕТЧИКОВ ====================
+
 
 def test_product_count_with_inherited_products():
     """Тест проверки счетчика продуктов при добавлении наследников"""
@@ -660,6 +650,7 @@ def test_category_count_with_inherited_products():
 
 # ==================== ТЕСТЫ ДЛЯ ГРАНИЧНЫХ СЛУЧАЕВ ====================
 
+
 def test_edge_case_empty_smartphone():
     """Тест проверки смартфона с минимальными значениями"""
     smartphone = Smartphone("", "", 0.0, 0, "", "", 0, "")
@@ -698,6 +689,7 @@ def test_edge_case_zero_price():
 
 
 # ==================== ТЕСТЫ ДЛЯ ВЫВОДА СООБЩЕНИЙ ====================
+
 
 def test_add_product_success_message(capsys):
     """Тест проверки вывода сообщения при успешном добавлении продукта"""
