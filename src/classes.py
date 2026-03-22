@@ -1,12 +1,55 @@
-class Product:
+from abc import ABC, abstractmethod
+
+class BaseProduct(ABC):
+    @abstractmethod
+    def __init__(self, *args, **kwargs):
+        pass
+
+
+class LogMixin:
+    """Миксин для вывода информации о создании объекта в консоль."""
+
+    def __init__(self, *args, **kwargs):
+        """
+        Выводит информацию о создании объекта.
+        Использует __repr__ для формирования строки.
+        """
+        # Формируем строку с названием класса и переданными аргументами
+        class_name = self.__class__.__name__
+
+        # Собираем все позиционные аргументы
+        args_list = [repr(arg) for arg in args]
+
+        # Собираем все именованные аргументы
+        kwargs_list = [f"{key}={repr(value)}" for key, value in kwargs.items()]
+
+        # Объединяем все аргументы в один список
+        all_args_list = args_list + kwargs_list
+
+        # Формируем строку аргументов, разделенных запятыми
+        all_args = ", ".join(all_args_list)
+
+        # Выводим информацию о создании объекта в формате: ClassName(arg1, arg2, ...)
+        print(f"Создан объект: {class_name}({all_args})")
+
+        # Вызываем следующий __init__ в цепочке наследования
+        super().__init__(*args, **kwargs)
+
+
+
+
+class Product(LogMixin, BaseProduct):
     """Класс для описания товара"""
 
-    def __init__(self, name: str, description: str, price: float, quantity: int):
+    def __init__(self, name: str, description: str, price: float, quantity: int, *args, **kwargs):
         """Метод для инициализации экземпляра класса Product"""
+        super().__init__(name, description, price, quantity, *args, **kwargs)
         self.name = name
         self.description = description
         self.__price = price  # Приватный атрибут цены
         self.quantity = quantity
+
+
 
     def __str__(self):
         """
@@ -197,56 +240,6 @@ class LawnGrass(Product):
         )
 
 
-class CategoryIterator:
-    """
-    Вспомогательный класс-итератор для перебора товаров в категории.
-    Реализует протокол итератора (методы __iter__ и __next__).
-    """
-
-    def __init__(self, category):
-        """
-        Инициализация итератора.
-
-        Args:
-            category: Объект класса Category, товары которого нужно перебирать
-        """
-        self._category = category
-        self._index = 0  # Текущий индекс при итерации
-
-    def __iter__(self):
-        """
-        Магический метод, возвращающий итератор.
-        Необходим для совместимости с протоколом итератора.
-        """
-        return self
-
-    def __next__(self):
-        """
-        Магический метод, возвращающий следующий элемент при итерации.
-
-        Returns:
-            Следующий товар из категории
-
-        Raises:
-            StopIteration: Когда товары в категории закончились
-        """
-        # Получаем список товаров категории
-        products = self._category.products_list
-
-        # Проверяем, не вышли ли мы за пределы списка
-        if self._index < len(products):
-            # Получаем текущий товар
-            product = products[self._index]
-            # Увеличиваем индекс для следующего вызова
-            self._index += 1
-            # Возвращаем товар
-            return product
-        else:
-            # Если товары закончились, сбрасываем индекс и выбрасываем исключение
-            self._index = 0
-            raise StopIteration
-
-
 class Category:
     """Класс для описания категории товаров"""
 
@@ -354,3 +347,53 @@ class Category:
     def products_list(self):
         """Геттер для получения списка товаров (для внутреннего использования)"""
         return self.__products
+
+
+class CategoryIterator:
+    """
+    Вспомогательный класс-итератор для перебора товаров в категории.
+    Реализует протокол итератора (методы __iter__ и __next__).
+    """
+
+    def __init__(self, category):
+        """
+        Инициализация итератора.
+
+        Args:
+            category: Объект класса Category, товары которого нужно перебирать
+        """
+        self._category = category
+        self._index = 0  # Текущий индекс при итерации
+
+    def __iter__(self):
+        """
+        Магический метод, возвращающий итератор.
+        Необходим для совместимости с протоколом итератора.
+        """
+        return self
+
+    def __next__(self):
+        """
+        Магический метод, возвращающий следующий элемент при итерации.
+
+        Returns:
+            Следующий товар из категории
+
+        Raises:
+            StopIteration: Когда товары в категории закончились
+        """
+        # Получаем список товаров категории
+        products = self._category.products_list
+
+        # Проверяем, не вышли ли мы за пределы списка
+        if self._index < len(products):
+            # Получаем текущий товар
+            product = products[self._index]
+            # Увеличиваем индекс для следующего вызова
+            self._index += 1
+            # Возвращаем товар
+            return product
+        else:
+            # Если товары закончились, сбрасываем индекс и выбрасываем исключение
+            self._index = 0
+            raise StopIteration
