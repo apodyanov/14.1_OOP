@@ -154,22 +154,14 @@ class Smartphone(Product):
         model: str,
         memory: int,
         color: str,
+        *args,  # Добавляем *args
+        **kwargs  # Добавляем **kwargs
     ):
         """
         Метод для инициализации экземпляра класса Smartphone
-
-        Args:
-            name: Название смартфона
-            description: Описание
-            price: Цена
-            quantity: Количество на складе
-            efficiency: Производительность (например, "высокая", "средняя")
-            model: Модель смартфона
-            memory: Объем встроенной памяти в ГБ
-            color: Цвет
         """
-        # Вызываем конструктор родительского класса
-        super().__init__(name, description, price, quantity)
+        # Вызываем конструктор родительского класса, передавая все аргументы
+        super().__init__(name, description, price, quantity, efficiency, model, memory, color, *args, **kwargs)
         self.efficiency = efficiency
         self.model = model
         self.memory = memory
@@ -198,21 +190,14 @@ class LawnGrass(Product):
         country: str,
         germination_period: str,
         color: str,
+        *args,  # Добавляем *args
+        **kwargs  # Добавляем **kwargs
     ):
         """
         Метод для инициализации экземпляра класса LawnGrass
-
-        Args:
-            name: Название травы
-            description: Описание
-            price: Цена
-            quantity: Количество на складе
-            country: Страна-производитель
-            germination_period: Срок прорастания (например, "7-14 дней")
-            color: Цвет
         """
-        # Вызываем конструктор родительского класса
-        super().__init__(name, description, price, quantity)
+        # Вызываем конструктор родительского класса, передавая все аргументы
+        super().__init__(name, description, price, quantity, country, germination_period, color, *args, **kwargs)
         self.country = country
         self.germination_period = germination_period
         self.color = color
