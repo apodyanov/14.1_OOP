@@ -40,8 +40,7 @@ class Product:
         # Проверяем, что оба объекта принадлежат к одному и тому же классу
         if type(self) != type(other):
             raise TypeError(
-                f"Нельзя складывать товары разных категорий: "
-                f"{type(self).__name__} и {type(other).__name__}"
+                f"Нельзя складывать товары разных категорий: " f"{type(self).__name__} и {type(other).__name__}"
             )
 
         # Вычисляем общую стоимость
@@ -114,8 +113,17 @@ class Product:
 class Smartphone(Product):
     """Новый класс наследник класса Product"""
 
-    def __init__(self, name: str, description: str, price: float, quantity: int,
-                 efficiency: str, model: str, memory: int, color: str):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        efficiency: str,
+        model: str,
+        memory: int,
+        color: str,
+    ):
         """
         Метод для инициализации экземпляра класса Smartphone
 
@@ -141,15 +149,25 @@ class Smartphone(Product):
         Магический метод для строкового представления смартфона.
         Переопределяем метод родителя для добавления специфичной информации.
         """
-        return (f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
-                f"Модель: {self.model}, Память: {self.memory}ГБ, Цвет: {self.color}")
-
+        return (
+            f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
+            f"Модель: {self.model}, Память: {self.memory}ГБ, Цвет: {self.color}"
+        )
 
 
 class LawnGrass(Product):
     """Новый класс наследник класса Product"""
-    def __init__(self, name: str, description: str, price: float, quantity: int,
-                 country: str, germination_period: str, color: str):
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+        country: str,
+        germination_period: str,
+        color: str,
+    ):
         """
         Метод для инициализации экземпляра класса LawnGrass
 
@@ -173,8 +191,10 @@ class LawnGrass(Product):
         Магический метод для строкового представления газонной травы.
         Переопределяем метод родителя для добавления специфичной информации.
         """
-        return (f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
-                f"Страна: {self.country}, Срок прорастания: {self.germination_period}, Цвет: {self.color}")
+        return (
+            f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт. "
+            f"Страна: {self.country}, Срок прорастания: {self.germination_period}, Цвет: {self.color}"
+        )
 
 
 class CategoryIterator:
@@ -293,9 +313,7 @@ class Category:
         # issubclass() проверяет, является ли класс наследником другого класса
         # Это альтернативный способ проверки, который можно использовать
         if not issubclass(type(product), Product):
-            raise TypeError(
-                f"Класс {type(product).__name__} не является наследником Product"
-            )
+            raise TypeError(f"Класс {type(product).__name__} не является наследником Product")
 
         # Если обе проверки пройдены, добавляем продукт
         self.__products.append(product)
@@ -304,7 +322,6 @@ class Category:
 
         # Выводим информацию об успешном добавлении
         print(f"✓ Продукт '{product.name}' успешно добавлен в категорию '{self.name}'")
-
 
     def add_product_with_check(self, product_data: dict):
         """
@@ -337,4 +354,3 @@ class Category:
     def products_list(self):
         """Геттер для получения списка товаров (для внутреннего использования)"""
         return self.__products
-
