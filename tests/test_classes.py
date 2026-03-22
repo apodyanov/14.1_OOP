@@ -1,6 +1,6 @@
 import pytest
 
-from src.classes import Category, LawnGrass, Product, Smartphone
+from src.classes import Category, LawnGrass, Product, Smartphone, LogMixin, BaseProduct
 
 
 @pytest.fixture
@@ -709,3 +709,276 @@ def test_add_product_error_message(capsys):
         category.add_product("не продукт")
 
     # Ошибка должна быть поднята, сообщение проверяем через exc_info
+
+
+def test_log_mixin_output_for_product(capsys):
+    """Тест проверки вывода LogMixin при создании обычного продукта"""
+    # Создаем продукт
+    product = Product("Продукт1", "Описание продукта", 1200.0, 10)
+
+    # Проверяем вывод в консоль
+    captured = capsys.readouterr()
+    expected_output = "Создан объект: Product('Продукт1', 'Описание продукта', 1200.0, 10)\n"
+    assert captured.out == expected_output
+
+    # Проверяем, что объект создался корректно
+    assert product.name == "Продукт1"
+    assert product.price == 1200.0
+    assert product.quantity == 10
+
+
+def test_log_mixin_output_for_smartphone(capsys):
+    """Тест проверки вывода LogMixin при создании смартфона"""
+    smartphone = Smartphone(
+        "iPhone 15 Pro",
+        "Флагманский смартфон",
+        99999.0,
+        5,
+        "высокая",
+        "iPhone 15 Pro",
+        256,
+        "черный"
+    )
+
+    captured = capsys.readouterr()
+    expected_output = (
+        "Создан объект: Smartphone('iPhone 15 Pro', 'Флагманский смартфон', "
+        "99999.0, 5, 'высокая', 'iPhone 15 Pro', 256, 'черный')\n"
+    )
+    assert captured.out == expected_output
+
+    # Проверяем, что объект создался корректно
+    assert smartphone.name == "iPhone 15 Pro"
+    assert smartphone.efficiency == "высокая"
+    assert smartphone.memory == 256
+
+
+def test_log_mixin_output_for_lawn_grass(capsys):
+    """Тест проверки вывода LogMixin при создании газонной травы"""
+    lawn_grass = LawnGrass(
+        "Газонная трава премиум",
+        "Смесь для идеального газона",
+        1500.0,
+        20,
+        "Голландия",
+        "10-14 дней",
+        "зеленый"
+    )
+
+    captured = capsys.readouterr()
+    expected_output = (
+        "Создан объект: LawnGrass('Газонная трава премиум', 'Смесь для идеального газона', "
+        "1500.0, 20, 'Голландия', '10-14 дней', 'зеленый')\n"
+    )
+    assert captured.out == expected_output
+
+    # Проверяем, что объект создался корректно
+    assert lawn_grass.name == "Газонная трава премиум"
+    assert lawn_grass.country == "Голландия"
+    assert lawn_grass.germination_period == "10-14 дней"
+
+
+def test_log_mixin_multiple_creations(capsys):
+    """Тест проверки вывода LogMixin при создании нескольких объектов"""
+    # Создаем несколько объектов подряд
+    product1 = Product("Товар 1", "Описание 1", 100.0, 5)
+    product2 = Product("Товар 2", "Описание 2", 200.0, 3)
+    smartphone = Smartphone("Смартфон", "Описание", 500.0, 2, "средняя", "Model X", 128, "черный")
+
+    captured = capsys.readouterr()
+    expected_outputs = [
+        "Создан объект: Product('Товар 1', 'Описание 1', 100.0, 5)\n",
+        "Создан объект: Product('Товар 2', 'Описание 2', 200.0, 3)\n",
+        "Создан объект: Smartphone('Смартфон', 'Описание', 500.0, 2, 'средняя', 'Model X', 128, 'черный')\n"
+    ]
+
+    for expected in expected_outputs:
+        assert expected in captured.out
+
+
+
+
+def test_log_mixin_with_classmethod_new_product(capsys):
+    """Тест проверки, что LogMixin работает и при использовании classmethod new_product"""
+    product_data = {
+        "name": "Xiaomi Redmi Note 11",
+        "description": "1024GB, Синий",
+        "price": 31000.0,
+        "quantity": 14
+    }
+
+    product = Product.new_product(product_data)
+
+    captured = capsys.readouterr()
+    # Должно быть два сообщения:
+    # 1. "Создаем новый товар 'Xiaomi Redmi Note 11'"
+    # 2. "Создан объект: Product('Xiaomi Redmi Note 11', '1024GB, Синий', 31000.0, 14)"
+
+    assert "Создаем новый товар 'Xiaomi Redmi Note 11'" in captured.out
+    assert "Создан объект: Product('Xiaomi Redmi Note 11', '1024GB, Синий', 31000.0, 14)" in captured.out
+
+
+def test_log_mixin_does_not_affect_existing_functionality():
+    """Тест проверки, что LogMixin не нарушает существующую функциональность"""
+    # Создаем продукты
+    product1 = Product("Товар 1", "Описание 1", 100.0, 10)
+    product2 = Product("Товар 2", "Описание 2", 200.0, 5)
+    smartphone = Smartphone("iPhone", "Описание", 99999.0, 3, "высокая", "iPhone 15", 256, "черный")
+    lawn_grass = LawnGrass("Трава", "Описание", 1500.0, 20, "Голландия", "10 дней", "зеленый")
+
+    # Проверяем все существующие методы
+    assert product1 + product2 == (100.0 * 10) + (200.0 * 5)
+
+    # Проверяем строковые представления
+    assert "Товар 1, 100.0 руб. Остаток: 10 шт." in str(product1)
+    assert "Модель: iPhone 15" in str(smartphone)
+    assert "Страна: Голландия" in str(lawn_grass)
+
+    # Проверяем работу с категориями
+    category = Category("Тест", "Описание")
+    category.add_product(product1)
+    category.add_product(smartphone)
+    category.add_product(lawn_grass)
+
+    assert len(category.products_list) == 3
+    assert "Товар 1" in category.products
+    assert "iPhone" in category.products
+    assert "Трава" in category.products
+
+    # Проверяем итератор
+    products_count = 0
+    for product in category:
+        products_count += 1
+    assert products_count == 3
+
+
+def test_log_mixin_mro_order():
+    """Тест проверки правильного порядка MRO (Method Resolution Order)"""
+    # Проверяем, что LogMixin стоит перед BaseProduct в MRO
+    mro = Product.__mro__
+
+    # Получаем имена классов в MRO
+    mro_names = [cls.__name__ for cls in mro]
+
+    # Проверяем порядок: Product -> LogMixin -> BaseProduct -> ABC -> object
+    assert mro_names.index("LogMixin") < mro_names.index("BaseProduct")
+    assert "Product" in mro_names
+    assert "LogMixin" in mro_names
+    assert "BaseProduct" in mro_names
+
+    # Проверяем, что миксин вызывается первым
+    class TestMixinOrder:
+        def __init__(self, *args, **kwargs):
+            print("Mixin init")
+            super().__init__(*args, **kwargs)
+
+    class TestBase:
+        def __init__(self, *args, **kwargs):
+            print("Base init")
+
+    class TestClass(TestMixinOrder, TestBase):
+        def __init__(self, value):
+            super().__init__(value)
+
+    # Создаем тестовый объект и проверяем порядок вызовов
+    import io
+    import sys
+    old_stdout = sys.stdout
+    sys.stdout = io.StringIO()
+
+    test_obj = TestClass(10)
+    output = sys.stdout.getvalue()
+    sys.stdout = old_stdout
+
+    # Миксин должен быть вызван первым
+    lines = output.strip().split('\n')
+    assert lines[0] == "Mixin init"
+    assert lines[1] == "Base init"
+
+
+def test_log_mixin_with_category_initialization(capsys):
+    """Тест проверки, что LogMixin не влияет на создание категорий"""
+    category = Category("Смартфоны", "Категория для смартфонов")
+
+    captured = capsys.readouterr()
+    # Категория не использует LogMixin, поэтому вывода быть не должно
+    assert captured.out == ""
+
+    # Проверяем, что категория создалась корректно
+    assert category.name == "Смартфоны"
+    assert category.description == "Категория для смартфонов"
+
+
+def test_log_mixin_handles_all_argument_types(capsys):
+    """Тест проверки, что LogMixin корректно обрабатывает разные типы аргументов"""
+    # Строки
+    product1 = Product("Тест", "Описание", 100.0, 5)
+    captured = capsys.readouterr()
+    assert "Product('Тест', 'Описание', 100.0, 5)" in captured.out
+
+    # Целые числа
+    product2 = Product("Тест2", "Описание2", 200, 10)
+    captured = capsys.readouterr()
+    assert "Product('Тест2', 'Описание2', 200, 10)" in captured.out
+
+    # Числа с плавающей точкой
+    product3 = Product("Тест3", "Описание3", 300.55, 15)
+    captured = capsys.readouterr()
+    assert "Product('Тест3', 'Описание3', 300.55, 15)" in captured.out
+
+    # Отрицательные числа
+    product4 = Product("Тест4", "Описание4", -50.0, -3)
+    captured = capsys.readouterr()
+    assert "Product('Тест4', 'Описание4', -50.0, -3)" in captured.out
+
+    # Ноль
+    product5 = Product("Тест5", "Описание5", 0, 0)
+    captured = capsys.readouterr()
+    assert "Product('Тест5', 'Описание5', 0, 0)" in captured.out
+
+
+def test_log_mixin_output_with_newline_characters(capsys):
+    """Тест проверки, что LogMixin корректно обрабатывает символы новой строки"""
+    product = Product(
+        "Product\nwith\nnewlines",
+        "Description\nwith\nnewlines",
+        100.0,
+        5
+    )
+
+    captured = capsys.readouterr()
+    # repr() должен экранировать символы новой строки как \n
+    assert "Product\\nwith\\nnewlines" in captured.out
+    assert "Description\\nwith\\nnewlines" in captured.out
+
+
+def test_log_mixin_with_boolean_values(capsys):
+    """Тест проверки, что LogMixin корректно обрабатывает булевы значения"""
+
+    # Создаем тестовый класс для проверки булевых значений
+    class TestProduct(LogMixin, BaseProduct):
+        def __init__(self, name: str, is_active: bool, *args, **kwargs):
+            super().__init__(name, is_active, *args, **kwargs)
+            self.name = name
+            self.is_active = is_active
+
+    test_product = TestProduct("Тест", True)
+    captured = capsys.readouterr()
+    assert "TestProduct('Тест', True)" in captured.out
+
+    test_product2 = TestProduct("Тест2", False)
+    captured = capsys.readouterr()
+    assert "TestProduct('Тест2', False)" in captured.out
+
+
+def test_log_mixin_inheritance_chain():
+    """Тест проверки цепочки наследования с LogMixin"""
+    # Проверяем, что все дочерние классы наследуют LogMixin
+    assert hasattr(Product, "__init__")
+    assert hasattr(Smartphone, "__init__")
+    assert hasattr(LawnGrass, "__init__")
+
+    # Проверяем, что LogMixin есть в MRO всех классов
+    assert LogMixin in Product.__mro__
+    assert LogMixin in Smartphone.__mro__
+    assert LogMixin in LawnGrass.__mro__
