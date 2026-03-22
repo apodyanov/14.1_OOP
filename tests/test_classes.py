@@ -1,6 +1,6 @@
 import pytest
 
-from src.classes import Category, LawnGrass, Product, Smartphone, LogMixin, BaseProduct
+from src.classes import BaseProduct, Category, LawnGrass, LogMixin, Product, Smartphone
 
 
 @pytest.fixture
@@ -730,14 +730,7 @@ def test_log_mixin_output_for_product(capsys):
 def test_log_mixin_output_for_smartphone(capsys):
     """Тест проверки вывода LogMixin при создании смартфона"""
     smartphone = Smartphone(
-        "iPhone 15 Pro",
-        "Флагманский смартфон",
-        99999.0,
-        5,
-        "высокая",
-        "iPhone 15 Pro",
-        256,
-        "черный"
+        "iPhone 15 Pro", "Флагманский смартфон", 99999.0, 5, "высокая", "iPhone 15 Pro", 256, "черный"
     )
 
     captured = capsys.readouterr()
@@ -756,13 +749,7 @@ def test_log_mixin_output_for_smartphone(capsys):
 def test_log_mixin_output_for_lawn_grass(capsys):
     """Тест проверки вывода LogMixin при создании газонной травы"""
     lawn_grass = LawnGrass(
-        "Газонная трава премиум",
-        "Смесь для идеального газона",
-        1500.0,
-        20,
-        "Голландия",
-        "10-14 дней",
-        "зеленый"
+        "Газонная трава премиум", "Смесь для идеального газона", 1500.0, 20, "Голландия", "10-14 дней", "зеленый"
     )
 
     captured = capsys.readouterr()
@@ -789,23 +776,16 @@ def test_log_mixin_multiple_creations(capsys):
     expected_outputs = [
         "Создан объект: Product('Товар 1', 'Описание 1', 100.0, 5)\n",
         "Создан объект: Product('Товар 2', 'Описание 2', 200.0, 3)\n",
-        "Создан объект: Smartphone('Смартфон', 'Описание', 500.0, 2, 'средняя', 'Model X', 128, 'черный')\n"
+        "Создан объект: Smartphone('Смартфон', 'Описание', 500.0, 2, 'средняя', 'Model X', 128, 'черный')\n",
     ]
 
     for expected in expected_outputs:
         assert expected in captured.out
 
 
-
-
 def test_log_mixin_with_classmethod_new_product(capsys):
     """Тест проверки, что LogMixin работает и при использовании classmethod new_product"""
-    product_data = {
-        "name": "Xiaomi Redmi Note 11",
-        "description": "1024GB, Синий",
-        "price": 31000.0,
-        "quantity": 14
-    }
+    product_data = {"name": "Xiaomi Redmi Note 11", "description": "1024GB, Синий", "price": 31000.0, "quantity": 14}
 
     product = Product.new_product(product_data)
 
@@ -883,6 +863,7 @@ def test_log_mixin_mro_order():
     # Создаем тестовый объект и проверяем порядок вызовов
     import io
     import sys
+
     old_stdout = sys.stdout
     sys.stdout = io.StringIO()
 
@@ -891,7 +872,7 @@ def test_log_mixin_mro_order():
     sys.stdout = old_stdout
 
     # Миксин должен быть вызван первым
-    lines = output.strip().split('\n')
+    lines = output.strip().split("\n")
     assert lines[0] == "Mixin init"
     assert lines[1] == "Base init"
 
@@ -939,12 +920,7 @@ def test_log_mixin_handles_all_argument_types(capsys):
 
 def test_log_mixin_output_with_newline_characters(capsys):
     """Тест проверки, что LogMixin корректно обрабатывает символы новой строки"""
-    product = Product(
-        "Product\nwith\nnewlines",
-        "Description\nwith\nnewlines",
-        100.0,
-        5
-    )
+    product = Product("Product\nwith\nnewlines", "Description\nwith\nnewlines", 100.0, 5)
 
     captured = capsys.readouterr()
     # repr() должен экранировать символы новой строки как \n
