@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class BaseProduct(ABC):
     @abstractmethod
     def __init__(self, *args, **kwargs):
@@ -24,8 +25,6 @@ class LogMixin:
         super().__init__(*args, **kwargs)
 
 
-
-
 class Product(LogMixin, BaseProduct):
     """Класс для описания товара"""
 
@@ -36,8 +35,6 @@ class Product(LogMixin, BaseProduct):
         self.description = description
         self.__price = price  # Приватный атрибут цены
         self.quantity = quantity
-
-
 
     def __str__(self):
         """
@@ -155,7 +152,7 @@ class Smartphone(Product):
         memory: int,
         color: str,
         *args,  # Добавляем *args
-        **kwargs  # Добавляем **kwargs
+        **kwargs,  # Добавляем **kwargs
     ):
         """
         Метод для инициализации экземпляра класса Smartphone
@@ -191,7 +188,7 @@ class LawnGrass(Product):
         germination_period: str,
         color: str,
         *args,  # Добавляем *args
-        **kwargs  # Добавляем **kwargs
+        **kwargs,  # Добавляем **kwargs
     ):
         """
         Метод для инициализации экземпляра класса LawnGrass
