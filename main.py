@@ -80,3 +80,7 @@ if __name__ == '__main__':
         print("Возникла ошибка TypeError при добавлении не продукта")
     else:
         print("Не возникла ошибка TypeError при добавлении не продукта")
+
+
+class Product:
+    pass
