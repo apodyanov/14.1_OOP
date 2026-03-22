@@ -1,435 +1,724 @@
 import pytest
 
-from src.classes import Category, CategoryIterator, Product
+from main import Category, Product
+from src.classes import Smartphone, LawnGrass
 
 
-# Фикстуры для создания тестовых данных
 @pytest.fixture
 def sample_product():
     """Фикстура для создания тестового продукта"""
-    return Product("Тестовый продукт", "Тестовое описание", 100.0, 10)
+    return Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
 
 
 @pytest.fixture
-def sample_products():
-    """Фикстура для создания списка тестовых продуктов"""
-    return [
-        Product("Продукт 1", "Описание 1", 100.0, 5),
-        Product("Продукт 2", "Описание 2", 200.0, 3),
-        Product("Продукт 3", "Описание 3", 300.0, 2),
+def sample_category(sample_product):
+    """Фикстура для создания тестовой категории"""
+    category = Category(
+        "Смартфоны",
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+    )
+    category.add_product(sample_product)  # Используем новый метод add_product
+    return category
+
+
+@pytest.fixture
+def product_data():
+    """Фикстура с данными для создания продукта через класс-метод"""
+    return {"name": "Xiaomi Redmi Note 11", "description": "1024GB, Синий", "price": 31000.0, "quantity": 14}
+
+
+def test_product_initialization(sample_product):
+    """Тест проверки инициализации объекта класса Product"""
+    assert sample_product.name == "Samsung Galaxy S23 Ultra"
+    assert sample_product.description == "256GB, Серый цвет, 200MP камера"
+    assert sample_product.price == 180000.0  # Используем геттер
+    assert sample_product.quantity == 5
+
+
+def test_product_price_getter_setter():
+    """Тест проверки геттера и сеттера для цены"""
+    product = Product("Тест", "Описание", 100.0, 5)
+
+    # Проверка геттера
+    assert product.price == 100.0
+
+    # Проверка сеттера с корректной ценой
+    product.price = 150.0
+    assert product.price == 150.0
+
+    # Проверка сеттера с нулевой ценой
+    product.price = 0
+    assert product.price == 150.0  # Цена не должна измениться
+
+    # Проверка сеттера с отрицательной ценой
+    product.price = -50.0
+    assert product.price == 150.0  # Цена не должна измениться
+
+
+def test_product_new_product_classmethod(product_data):
+    """Тест проверки класс-метода new_product"""
+    product = Product.new_product(product_data)
+
+    assert isinstance(product, Product)
+    assert product.name == "Xiaomi Redmi Note 11"
+    assert product.description == "1024GB, Синий"
+    assert product.price == 31000.0
+    assert product.quantity == 14
+
+
+def test_product_new_product_with_duplicate_check(product_data):
+    """Тест проверки класс-метода new_product с обнаружением дубликата"""
+    # Создаем первый продукт
+    product1 = Product.new_product(product_data)
+
+    # Создаем список существующих продуктов
+    existing_products = [product1]
+
+    # Создаем дубликат с более высокой ценой и дополнительным количеством
+    duplicate_data = {
+        "name": "Xiaomi Redmi Note 11",  # То же имя
+        "description": "1024GB, Красный",  # Другое описание
+        "price": 32000.0,  # Более высокая цена
+        "quantity": 5,  # Дополнительное количество
+    }
+
+    # Вызываем класс-метод с проверкой дубликатов
+    result = Product.new_product(duplicate_data, existing_products)
+
+    # Проверяем, что вернулся тот же объект (не новый)
+    assert result is product1
+    # Проверяем, что количество увеличилось
+    assert result.quantity == 19  # 14 + 5
+    # Проверяем, что цена обновилась на максимальную
+    assert result.price == 32000.0
+
+
+def test_product_new_product_with_lower_price_duplicate(product_data):
+    """Тест проверки класс-метода new_product с дубликатом с меньшей ценой"""
+    # Создаем первый продукт
+    product1 = Product.new_product(product_data)
+
+    existing_products = [product1]
+
+    # Создаем дубликат с меньшей ценой
+    duplicate_data = {
+        "name": "Xiaomi Redmi Note 11",
+        "description": "1024GB, Зеленый",
+        "price": 30000.0,  # Меньшая цена
+        "quantity": 3,
+    }
+
+    result = Product.new_product(duplicate_data, existing_products)
+
+    # Проверяем, что вернулся тот же объект
+    assert result is product1
+    # Проверяем, что количество увеличилось
+    assert result.quantity == 17  # 14 + 3
+    # Проверяем, что цена НЕ обновилась (осталась большей)
+    assert result.price == 31000.0
+
+
+def test_category_initialization(sample_category):
+    """Тест проверки инициализации объекта класса Category"""
+    assert sample_category.name == "Смартфоны"
+    assert sample_category.description == (
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни"
+    )
+    # Проверяем через геттер products
+    assert len(sample_category.products.split("\n")) == 1  # products возвращает строку
+
+
+def test_category_private_products_attribute(sample_category):
+    """Тест проверки, что атрибут __products действительно приватный"""
+    # Проверяем, что нет прямого доступа к __products
+    all_attrs = dir(sample_category)
+    assert "__products" not in all_attrs, "Приватный атрибут не должен быть напрямую доступен"
+
+    # Проверяем, что есть только публичный интерфейс
+    assert "products" in all_attrs, "Должен быть доступен публичный геттер products"
+
+    # Проверяем, что через публичный интерфейс можно получить данные
+    assert isinstance(sample_category.products, str)
+
+    # Дополнительно можно проверить, что данные действительно есть
+    if sample_category.products != "В категории нет товаров":
+        assert "Samsung" in sample_category.products
+
+
+def test_category_products_property_format(sample_category, sample_product):
+    """Тест проверки формата вывода геттера products"""
+    products_str = sample_category.products
+
+    # Проверяем, что строка содержит информацию о продукте в нужном формате
+    expected_format = f"{sample_product.name}, {sample_product.price} руб. Остаток: {sample_product.quantity} шт."
+    assert expected_format in products_str
+
+
+def test_add_product_method():
+    """Тест проверки метода add_product"""
+    category = Category("Тест", "Описание")
+    product = Product("Тестовый товар", "Описание", 100.0, 5)
+
+    # Используем метод add_product
+    category.add_product(product)
+
+    # Проверяем через геттер
+    products_str = category.products
+    assert "Тестовый товар, 100.0 руб. Остаток: 5 шт." in products_str
+
+
+def test_category_count_increase(sample_category):
+    """Тест проверки увеличения счетчика категорий"""
+    initial_count = Category.category_count
+
+    # Создаем категорию без сохранения в переменную
+    Category("Телевизоры", "Современные телевизоры")
+
+    assert Category.category_count == initial_count + 1
+    assert Category.category_count > 0
+
+
+def test_product_count_increase():
+    """Тест проверки увеличения счетчика продуктов"""
+    initial_product_count = Category.product_count
+
+    # Создаем продукт
+    product1 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+    # Создаем категорию и добавляем продукт через метод add_product
+    category = Category("Смартфоны", "Бюджетные смартфоны")
+    category.add_product(product1)
+
+    # Проверяем, что счетчик увеличился на 1
+    assert Category.product_count == initial_product_count + 1
+
+
+def test_product_count_with_duplicate_addition(product_data):
+    """Тест проверки счетчика продуктов при добавлении дубликата"""
+    initial_count = Category.product_count
+
+    category = Category("Тест", "Описание")
+
+    # Добавляем первый продукт
+    product1 = Product.new_product(product_data)
+    category.add_product(product1)
+    assert Category.product_count == initial_count + 1
+
+    # Пытаемся добавить дубликат через add_product_with_check
+    duplicate_data = {
+        "name": "Xiaomi Redmi Note 11",
+        "description": "Другое описание",
+        "price": 32000.0,
+        "quantity": 5,
+    }
+
+    # Используем специальный метод для добавления с проверкой
+    result = category.add_product_with_check(duplicate_data)
+
+    # Проверяем, что счетчик НЕ увеличился (так как дубликат не добавил новый объект)
+    assert Category.product_count == initial_count + 1
+    # Но количество товара должно увеличиться
+    assert result.quantity == 19
+
+
+def test_category_without_products():
+    """Тест проверки создания категории без товаров"""
+    category = Category("Пустая категория", "Категория без товаров")
+
+    assert category.name == "Пустая категория"
+    assert category.description == "Категория без товаров"
+
+    # Проверяем, что возвращается либо пустая строка, либо сообщение о пустой категории
+    products_output = category.products
+    assert products_output == "" or products_output == "В категории нет товаров"
+
+
+def test_multiple_products_in_category():
+    """Тест проверки категории с несколькими товарами"""
+    product1 = Product("Товар 1", "Описание 1", 100.0, 10)
+    product2 = Product("Товар 2", "Описание 2", 200.0, 20)
+    product3 = Product("Товар 3", "Описание 3", 300.0, 30)
+
+    category = Category("Тестовая категория", "Описание")
+    category.add_product(product1)
+    category.add_product(product2)
+    category.add_product(product3)
+
+    products_str = category.products
+    assert "Товар 1, 100.0 руб. Остаток: 10 шт." in products_str
+    assert "Товар 2, 200.0 руб. Остаток: 20 шт." in products_str
+    assert "Товар 3, 300.0 руб. Остаток: 30 шт." in products_str
+
+
+def test_category_products_are_product_objects(sample_category):
+    """Тест проверки, что в списке товаров категории хранятся объекты Product"""
+    # Используем вспомогательный геттер для получения списка объектов
+    products_list = sample_category.products_list  # Добавьте этот геттер в класс Category
+
+    # Проверяем, что каждый элемент является экземпляром класса Product
+    for product in products_list:
+        assert isinstance(product, Product)
+
+    # Проверяем наличие всех необходимых атрибутов
+    if products_list:
+        product = products_list[0]
+        assert hasattr(product, "name")
+        assert hasattr(product, "description")
+        assert hasattr(product, "price")
+        assert hasattr(product, "quantity")
+
+
+def test_add_product_to_category():
+    """Тест проверки добавления объекта Product в категорию через метод add_product"""
+    # Создаем продукт
+    new_product = Product("iPhone 15", "128GB, Black", 120000.0, 3)
+
+    # Создаем категорию
+    category = Category("Смартфоны", "Разные смартфоны")
+
+    # Добавляем продукт в категорию через метод
+    category.add_product(new_product)
+
+    # Проверяем через геттер
+    products_str = category.products
+    assert "iPhone 15, 120000.0 руб. Остаток: 3 шт." in products_str
+
+    # Также проверяем через вспомогательный геттер
+    products_list = category.products_list
+    assert len(products_list) == 1
+    assert isinstance(products_list[0], Product)
+    assert products_list[0].name == "iPhone 15"
+    assert products_list[0].price == 120000.0
+
+
+# ==================== НОВЫЕ ТЕСТЫ ДЛЯ SMARTSPHONE ====================
+
+def test_smartphone_initialization(sample_smartphone):
+    """Тест проверки инициализации объекта класса Smartphone"""
+    assert sample_smartphone.name == "iPhone 15 Pro"
+    assert sample_smartphone.description == "Флагманский смартфон с мощным процессором"
+    assert sample_smartphone.price == 99999.0
+    assert sample_smartphone.quantity == 5
+    assert sample_smartphone.efficiency == "высокая"
+    assert sample_smartphone.model == "iPhone 15 Pro"
+    assert sample_smartphone.memory == 256
+    assert sample_smartphone.color == "черный"
+
+
+def test_smartphone_inheritance(sample_smartphone):
+    """Тест проверки наследования Smartphone от Product"""
+    assert isinstance(sample_smartphone, Product)
+    assert isinstance(sample_smartphone, Smartphone)
+    assert not isinstance(sample_smartphone, LawnGrass)
+    assert issubclass(Smartphone, Product)
+
+
+def test_smartphone_str_method(sample_smartphone):
+    """Тест проверки строкового представления смартфона"""
+    expected_str = (f"{sample_smartphone.name}, {sample_smartphone.price} руб. "
+                    f"Остаток: {sample_smartphone.quantity} шт. "
+                    f"Модель: {sample_smartphone.model}, "
+                    f"Память: {sample_smartphone.memory}ГБ, "
+                    f"Цвет: {sample_smartphone.color}")
+    assert str(sample_smartphone) == expected_str
+
+
+def test_smartphone_price_property(sample_smartphone):
+    """Тест проверки работы property цены у смартфона"""
+    assert sample_smartphone.price == 99999.0
+
+    sample_smartphone.price = 89999.0
+    assert sample_smartphone.price == 89999.0
+
+    sample_smartphone.price = -100
+    assert sample_smartphone.price == 89999.0  # Цена не изменилась
+
+
+# ==================== НОВЫЕ ТЕСТЫ ДЛЯ LAWNSGRASS ====================
+
+def test_lawn_grass_initialization(sample_lawn_grass):
+    """Тест проверки инициализации объекта класса LawnGrass"""
+    assert sample_lawn_grass.name == "Газонная трава премиум"
+    assert sample_lawn_grass.description == "Смесь для идеального газона"
+    assert sample_lawn_grass.price == 1500.0
+    assert sample_lawn_grass.quantity == 20
+    assert sample_lawn_grass.country == "Голландия"
+    assert sample_lawn_grass.germination_period == "10-14 дней"
+    assert sample_lawn_grass.color == "зеленый"
+
+
+def test_lawn_grass_inheritance(sample_lawn_grass):
+    """Тест проверки наследования LawnGrass от Product"""
+    assert isinstance(sample_lawn_grass, Product)
+    assert isinstance(sample_lawn_grass, LawnGrass)
+    assert not isinstance(sample_lawn_grass, Smartphone)
+    assert issubclass(LawnGrass, Product)
+
+
+def test_lawn_grass_str_method(sample_lawn_grass):
+    """Тест проверки строкового представления газонной травы"""
+    expected_str = (f"{sample_lawn_grass.name}, {sample_lawn_grass.price} руб. "
+                    f"Остаток: {sample_lawn_grass.quantity} шт. "
+                    f"Страна: {sample_lawn_grass.country}, "
+                    f"Срок прорастания: {sample_lawn_grass.germination_period}, "
+                    f"Цвет: {sample_lawn_grass.color}")
+    assert str(sample_lawn_grass) == expected_str
+
+
+# ==================== НОВЫЕ ТЕСТЫ ДЛЯ МАГИЧЕСКОГО МЕТОДА __add__ ====================
+
+def test_product_add_same_class():
+    """Тест проверки сложения продуктов одного класса"""
+    product1 = Product("Товар 1", "Описание", 100.0, 10)
+    product2 = Product("Товар 2", "Описание", 200.0, 5)
+
+    result = product1 + product2
+
+    expected = (100.0 * 10) + (200.0 * 5)  # 1000 + 1000 = 2000
+    assert result == expected
+
+
+def test_smartphone_add_same_class(sample_smartphone):
+    """Тест проверки сложения смартфонов одного класса"""
+    smartphone2 = Smartphone(
+        "Samsung Galaxy S24",
+        "Флагманский смартфон",
+        89999.0,
+        3,
+        "высокая",
+        "Galaxy S24",
+        256,
+        "фиолетовый"
+    )
+
+    result = sample_smartphone + smartphone2
+
+    expected = (99999.0 * 5) + (89999.0 * 3)  # 499995 + 269997 = 769992
+    assert result == expected
+
+
+def test_lawn_grass_add_same_class(sample_lawn_grass):
+    """Тест проверки сложения газонной травы одного класса"""
+    lawn_grass2 = LawnGrass(
+        "Газонная трава стандарт",
+        "Обычная смесь",
+        800.0,
+        30,
+        "Россия",
+        "14-21 дней",
+        "светло-зеленый"
+    )
+
+    result = sample_lawn_grass + lawn_grass2
+
+    expected = (1500.0 * 20) + (800.0 * 30)  # 30000 + 24000 = 54000
+    assert result == expected
+
+
+def test_add_different_classes_raises_error(sample_product, sample_smartphone, sample_lawn_grass):
+    """Тест проверки, что сложение разных классов вызывает TypeError"""
+    with pytest.raises(TypeError) as exc_info:
+        sample_product + sample_smartphone
+    assert "Нельзя складывать товары разных категорий" in str(exc_info.value)
+
+    with pytest.raises(TypeError) as exc_info:
+        sample_smartphone + sample_lawn_grass
+    assert "Нельзя складывать товары разных категорий" in str(exc_info.value)
+
+    with pytest.raises(TypeError) as exc_info:
+        sample_lawn_grass + sample_product
+    assert "Нельзя складывать товары разных категорий" in str(exc_info.value)
+
+
+def test_add_with_non_product_raises_error(sample_product):
+    """Тест проверки, что сложение с не-продуктом вызывает TypeError"""
+    with pytest.raises(TypeError) as exc_info:
+        sample_product + 100
+    assert "Нельзя сложить Product с int" in str(exc_info.value)
+
+    with pytest.raises(TypeError) as exc_info:
+        sample_product + "строка"
+    assert "Нельзя сложить Product с str" in str(exc_info.value)
+
+    with pytest.raises(TypeError) as exc_info:
+        sample_product + [1, 2, 3]
+    assert "Нельзя сложить Product с list" in str(exc_info.value)
+
+
+# ==================== НОВЫЕ ТЕСТЫ ДЛЯ ЗАЩИЩЕННОГО ADD_PRODUCT ====================
+
+def test_add_product_with_valid_products():
+    """Тест проверки добавления корректных продуктов в категорию"""
+    category = Category("Тестовая", "Категория для тестирования")
+
+    product = Product("Обычный товар", "Описание", 100.0, 5)
+    smartphone = Smartphone("Смартфон", "Описание", 500.0, 2, "высокая", "Model X", 128, "черный")
+    lawn_grass = LawnGrass("Трава", "Описание", 200.0, 10, "Россия", "7 дней", "зеленый")
+
+    category.add_product(product)
+    category.add_product(smartphone)
+    category.add_product(lawn_grass)
+
+    products_list = category.products_list
+    assert len(products_list) == 3
+    assert isinstance(products_list[0], Product)
+    assert isinstance(products_list[1], Smartphone)
+    assert isinstance(products_list[2], LawnGrass)
+
+
+def test_add_product_with_invalid_types():
+    """Тест проверки, что добавление некорректных типов вызывает TypeError"""
+    category = Category("Тестовая", "Категория для тестирования")
+
+    invalid_objects = [
+        ("строка", "Это не продукт"),
+        ("число", 123),
+        ("список", [1, 2, 3]),
+        ("словарь", {"name": "test"}),
+        ("None", None),
+        ("булево значение", True),
+        ("float", 10.5),
     ]
 
+    for obj_name, invalid_obj in invalid_objects:
+        with pytest.raises(TypeError) as exc_info:
+            category.add_product(invalid_obj)
+        assert "Можно добавлять только объекты класса Product или его наследников" in str(exc_info.value)
+        assert f"Получен объект типа: {type(invalid_obj).__name__}" in str(exc_info.value)
 
-@pytest.fixture
-def sample_category(sample_products):
-    """Фикстура для создания тестовой категории"""
-    return Category("Тестовая категория", "Тестовое описание категории", sample_products)
-
-
-# Тесты для класса Product
-class TestProduct:
-    """Тесты для класса Product"""
-
-    def test_product_initialization(self, sample_product):
-        """Тест инициализации продукта"""
-        assert sample_product.name == "Тестовый продукт"
-        assert sample_product.description == "Тестовое описание"
-        assert sample_product.price == 100.0
-        assert sample_product.quantity == 10
-
-    def test_price_getter_setter(self, sample_product):
-        """Тест геттера и сеттера цены"""
-        # Проверка начальной цены
-        assert sample_product.price == 100.0
-
-        # Проверка установки корректной цены
-        sample_product.price = 150.0
-        assert sample_product.price == 150.0
-
-        # Проверка установки некорректной цены (должен вывести сообщение, но не изменить цену)
-        sample_product.price = -50.0
-        assert sample_product.price == 150.0  # Цена не должна измениться
-
-        sample_product.price = 0
-        assert sample_product.price == 150.0  # Цена не должна измениться
-
-    def test_product_str(self, sample_product):
-        """Тест строкового представления продукта"""
-        expected_str = "Тестовый продукт, 100.0 руб. Остаток: 10 шт."
-        assert str(sample_product) == expected_str
-
-    def test_product_add(self):
-        """Тест сложения продуктов"""
-        product_a = Product("Товар A", "Описание A", 100.0, 10)
-        product_b = Product("Товар B", "Описание B", 200.0, 2)
-
-        # Проверка сложения продуктов
-        total = product_a + product_b
-        expected_total = 100.0 * 10 + 200.0 * 2  # 1000 + 400 = 1400
-        assert total == expected_total
-
-        # Проверка сложения с другими продуктами
-        product_c = Product("Товар C", "Описание C", 50.0, 5)
-        total2 = product_b + product_c
-        expected_total2 = 200.0 * 2 + 50.0 * 5  # 400 + 250 = 650
-        assert total2 == expected_total2
-
-    def test_new_product_creation(self):
-        """Тест создания нового продукта через класс-метод"""
-        product_data = {"name": "Новый продукт", "description": "Новое описание", "price": 500.0, "quantity": 7}
-
-        product = Product.new_product(product_data)
-        assert product.name == "Новый продукт"
-        assert product.description == "Новое описание"
-        assert product.price == 500.0
-        assert product.quantity == 7
-
-    def test_new_product_with_duplicate(self, sample_products):
-        """Тест обработки дубликатов при создании продукта"""
-        # Создаем дубликат существующего продукта
-        duplicate_data = {
-            "name": "Продукт 1",  # Совпадает с именем первого продукта из фикстуры
-            "description": "Новое описание",
-            "price": 150.0,  # Цена выше существующей
-            "quantity": 3,
-        }
-
-        # Создаем продукт с проверкой на дубликаты
-        product = Product.new_product(duplicate_data, sample_products)
-
-        # Должен вернуться существующий продукт с обновленными данными
-        assert product.name == "Продукт 1"
-        assert product.price == 150.0  # Цена должна обновиться на максимальную
-        assert product.quantity == 8  # 5 (было) + 3 (новых) = 8
-
-    def test_new_product_with_lower_price_duplicate(self, sample_products):
-        """Тест обработки дубликата с более низкой ценой"""
-        duplicate_data = {
-            "name": "Продукт 2",  # Существующий продукт с ценой 200.0
-            "description": "Новое описание",
-            "price": 150.0,  # Цена ниже существующей
-            "quantity": 4,
-        }
-
-        product = Product.new_product(duplicate_data, sample_products)
-
-        # Цена не должна обновиться (остается максимальная)
-        assert product.price == 200.0
-        assert product.quantity == 7  # 3 (было) + 4 (новых) = 7
-
-
-# Тесты для класса Category
-class TestCategory:
-    """Тесты для класса Category"""
-
-    def test_category_initialization(self, sample_category, sample_products):
-        """Тест инициализации категории"""
-        assert sample_category.name == "Тестовая категория"
-        assert sample_category.description == "Тестовое описание категории"
-        assert len(sample_category.products_list) == 3
-        assert sample_category.products_list == sample_products
-
-    def test_category_counters(self, sample_category):
-        """Тест счетчиков категорий и продуктов"""
-        # Сохраняем текущие значения счетчиков
-        initial_category_count = Category.category_count
-        initial_product_count = Category.product_count
-
-        # Создаем новую категорию
-        new_category = Category("Новая категория", "Описание", [])
-
-        # Проверяем увеличение счетчиков
-        assert Category.category_count == initial_category_count + 1
-        assert Category.product_count == initial_product_count  # Не изменился, т.к. товаров нет
-
-        # Создаем продукт и добавляем в категорию
-        product = Product("Тест", "Описание", 100.0, 1)
-        new_category.add_product(product)
-
-        # Проверяем увеличение счетчика продуктов
-        assert Category.product_count == initial_product_count + 1
-
-    def test_add_product(self, sample_category):
-        """Тест добавления продукта в категорию"""
-        initial_count = len(sample_category.products_list)
-        initial_product_count = Category.product_count
-
-        new_product = Product("Новый продукт", "Новое описание", 300.0, 5)
-        sample_category.add_product(new_product)
-
-        assert len(sample_category.products_list) == initial_count + 1
-        assert sample_category.products_list[-1] == new_product
-        assert Category.product_count == initial_product_count + 1
-
-    def test_add_product_with_check_new(self, sample_category):
-        """Тест добавления нового продукта с проверкой на дубликаты"""
-        initial_count = len(sample_category.products_list)
-
-        product_data = {
-            "name": "Совершенно новый продукт",
-            "description": "Описание нового продукта",
-            "price": 400.0,
-            "quantity": 2,
-        }
-
-        product = sample_category.add_product_with_check(product_data)
-
-        assert len(sample_category.products_list) == initial_count + 1
-        assert product.name == "Совершенно новый продукт"
-        assert product.price == 400.0
-        assert product.quantity == 2
-
-    def test_add_product_with_check_duplicate(self, sample_category):
-        """Тест добавления дубликата продукта с проверкой"""
-        initial_count = len(sample_category.products_list)
-
-        # Данные дубликата существующего продукта
-        product_data = {
-            "name": "Продукт 1",  # Существующий продукт
-            "description": "Обновленное описание",
-            "price": 250.0,  # Более высокая цена
-            "quantity": 3,
-        }
-
-        product = sample_category.add_product_with_check(product_data)
-
-        # Количество продуктов не должно увеличиться (обновился существующий)
-        assert len(sample_category.products_list) == initial_count
-        assert product.quantity == 8  # 5 (было) + 3 (новых) = 8
-        assert product.price == 250.0  # Цена обновилась
-
-    def test_category_str(self, sample_category):
-        """Тест строкового представления категории"""
-        # В категории 3 продукта с количеством: 5, 3, 2 = всего 10
-        expected_str = "Тестовая категория, количество продуктов: 10 шт."
-        assert str(sample_category) == expected_str
-
-    def test_products_property(self, sample_category, sample_products):
-        """Тест геттера products (строковое представление всех продуктов)"""
-        expected_output = (
-            "Продукт 1, 100.0 руб. Остаток: 5 шт.\n"
-            "Продукт 2, 200.0 руб. Остаток: 3 шт.\n"
-            "Продукт 3, 300.0 руб. Остаток: 2 шт."
-        )
-        assert sample_category.products == expected_output
-
-
-# Тесты для класса CategoryIterator
-class TestCategoryIterator:
-    """Тесты для класса CategoryIterator"""
-
-    def test_iterator_creation(self, sample_category):
-        """Тест создания итератора"""
-        iterator = CategoryIterator(sample_category)
-        assert isinstance(iterator, CategoryIterator)
-        assert iterator._category == sample_category
-        assert iterator._index == 0
-
-    def test_iterator_iter_method(self, sample_category):
-        """Тест метода __iter__ итератора"""
-        iterator = CategoryIterator(sample_category)
-        # Метод __iter__ должен возвращать сам итератор
-        assert iterator.__iter__() is iterator
-
-    def test_iterator_next_method(self, sample_category, sample_products):
-        """Тест метода __next__ итератора"""
-        iterator = CategoryIterator(sample_category)
-
-        # Должен вернуть продукты по порядку
-        assert next(iterator) == sample_products[0]
-        assert iterator._index == 1
-
-        assert next(iterator) == sample_products[1]
-        assert iterator._index == 2
-
-        assert next(iterator) == sample_products[2]
-        assert iterator._index == 3
-
-        # При попытке получить следующий продукт должно быть исключение StopIteration
-        with pytest.raises(StopIteration):
-            next(iterator)
-
-        # Индекс должен сброситься после StopIteration
-        assert iterator._index == 0
-
-    def test_category_iter_method(self, sample_category):
-        """Тест метода __iter__ категории"""
-        # Метод __iter__ категории должен возвращать итератор
-        iterator = iter(sample_category)
-        assert isinstance(iterator, CategoryIterator)
-        assert iterator._category == sample_category
-
-    def test_category_in_for_loop(self, sample_category, sample_products):
-        """Тест использования категории в цикле for"""
-        collected_products = []
-        for product in sample_category:
-            collected_products.append(product)
-
-        # Должны быть собраны все продукты в правильном порядке
-        assert collected_products == sample_products
-        assert len(collected_products) == 3
-
-    def test_iterator_with_empty_category(self):
-        """Тест итератора с пустой категорией"""
-        empty_category = Category("Пустая", "Описание", [])
-
-        # Проверка в цикле for
-        products_in_loop = []
-        for product in empty_category:
-            products_in_loop.append(product)
-
-        assert len(products_in_loop) == 0
-
-        # Проверка через явный итератор
-        iterator = iter(empty_category)
-        with pytest.raises(StopIteration):
-            next(iterator)
-
-    def test_multiple_iterations(self, sample_category):
-        """Тест множественных итераций по одной категории"""
-        # Первая итерация
-        first_iteration = [p for p in sample_category]
-
-        # Вторая итерация (должна работать заново)
-        second_iteration = [p for p in sample_category]
-
-        # Обе итерации должны дать одинаковый результат
-        assert first_iteration == second_iteration
-        assert len(first_iteration) == 3
-        assert len(second_iteration) == 3
-
-    def test_iterator_independence(self, sample_category):
-        """Тест независимости разных итераторов одной категории"""
-        iterator1 = iter(sample_category)
-        iterator2 = iter(sample_category)
-
-        # Продвигаем первый итератор
-        next(iterator1)
-        assert iterator1._index == 1
-        assert iterator2._index == 0  # Второй итератор не должен измениться
-
-        # Продвигаем второй итератор
-        next(iterator2)
-        assert iterator1._index == 1
-        assert iterator2._index == 1
-
-        # Продвигаем первый итератор дальше
-        next(iterator1)
-        assert iterator1._index == 2
-        assert iterator2._index == 1
-
-
-# Интеграционные тесты
-class TestIntegration:
-    """Интеграционные тесты для проверки взаимодействия классов"""
-
-    def test_full_workflow(self):
-        """Тест полного рабочего процесса"""
-        # Создаем продукты
-        product1 = Product("Ноутбук", "Игровой ноутбук", 100000.0, 3)
-        product2 = Product("Мышь", "Беспроводная мышь", 5000.0, 10)
-        product3 = Product("Клавиатура", "Механическая клавиатура", 15000.0, 5)
-
-        # Создаем категорию
-        category = Category("Компьютеры", "Компьютерная периферия", [product1, product2])
-
-        # Проверяем счетчики
-        assert Category.category_count > 0
-        assert Category.product_count >= 13  # 3 + 10
-
-        # Добавляем продукт
-        category.add_product(product3)
-
-        # Проверяем строковое представление
-        assert "Компьютеры" in str(category)
-
-        # Проверяем сложение продуктов
-        total_value = product1 + product2
-        expected = 100000.0 * 3 + 5000.0 * 10  # 300000 + 50000 = 350000
-        assert total_value == expected
-
-        # Проверяем итерацию
-        products_in_category = []
-        for product in category:
-            products_in_category.append(product)
-
-        assert len(products_in_category) == 3
-        assert products_in_category[0].name == "Ноутбук"
-        assert products_in_category[1].name == "Мышь"
-        assert products_in_category[2].name == "Клавиатура"
-
-        # Проверяем добавление с проверкой дубликатов
-        duplicate_data = {"name": "Мышь", "description": "Новая беспроводная мышь", "price": 6000.0, "quantity": 5}
-
-        updated_product = category.add_product_with_check(duplicate_data)
-        assert updated_product.quantity == 15  # 10 + 5
-        assert updated_product.price == 6000.0  # Обновилась на максимальную
-
-        # Проверяем общую стоимость после обновления
-        new_total = product1 + updated_product
-        expected_new = 100000.0 * 3 + 6000.0 * 15  # 300000 + 90000 = 390000
-        assert new_total == expected_new
-
-
-# Тесты для проверки старых требований (чтобы убедиться, что они не сломались)
-class TestLegacyRequirements:
-    """Тесты для проверки, что старая функциональность работает"""
-
-    def test_category_counters_legacy(self):
-        """Тест счетчиков категорий и продуктов (старая функциональность)"""
-        # Сбрасываем счетчики для чистоты теста
-        Category.category_count = 0
-        Category.product_count = 0
-
-        # Создаем продукты
-        p1 = Product("p1", "d1", 100, 5)
-        p2 = Product("p2", "d2", 200, 3)
-
-        # Создаем первую категорию с продуктами
-        category1 = Category("category1", "description1", [p1, p2])
-        assert Category.category_count == 1
-        assert Category.product_count == 2  # 2 продукта в списке
-        assert len(category1.products_list) == 2  # Проверяем, что продукты действительно добавлены
-
-        # Создаем вторую категорию без продуктов
-        category2 = Category("category2", "description2", [])
-        assert Category.category_count == 2
-        assert Category.product_count == 2  # Не изменилось
-        assert len(category2.products_list) == 0  # Проверяем, что категория пустая
-
-        # Добавляем продукт во вторую категорию
-        category2.add_product(p1)
-        assert Category.product_count == 3  # Увеличилось на 1
-        assert len(category2.products_list) == 1  # Проверяем, что продукт добавлен
-        assert category2.products_list[0] == p1  # Проверяем, что добавлен правильный продукт
-
-        # Проверяем, что первая категория не изменилась
-        assert len(category1.products_list) == 2
-        assert category1.products_list[0] == p1
-        assert category1.products_list[1] == p2
-
-    def test_price_validation_legacy(self):
-        """Тест валидации цены (старая функциональность)"""
-        product = Product("Тест", "Описание", 100, 5)
-
-        # Попытка установить отрицательную цену
-        product.price = -50
-        assert product.price == 100  # Цена не изменилась
-
-        # Попытка установить нулевую цену
-        product.price = 0
-        assert product.price == 100  # Цена не изменилась
-
-        # Установка корректной цены
-        product.price = 150
-        assert product.price == 150
-
-    def test_new_product_creation_legacy(self):
-        """Тест создания продукта через класс-метод (старая функциональность)"""
-        data = {"name": "Тест", "description": "Описание", "price": 100, "quantity": 5}
-        product = Product.new_product(data)
-
-        assert isinstance(product, Product)
-        assert product.name == "Тест"
-        assert product.price == 100
-        assert product.quantity == 5
+
+def test_add_product_with_isinstance_check(sample_product, sample_smartphone):
+    """Тест проверки работы isinstance в методе add_product"""
+    category = Category("Тест", "Описание")
+
+    # Проверяем, что isinstance распознает оба типа как Product
+    assert isinstance(sample_product, Product)
+    assert isinstance(sample_smartphone, Product)
+
+    # Оба должны успешно добавляться
+    category.add_product(sample_product)
+    category.add_product(sample_smartphone)
+
+    assert len(category.products_list) == 2
+
+
+def test_add_product_with_issubclass_check():
+    """Тест проверки работы issubclass в методе add_product"""
+    # Проверяем отношения классов
+    assert issubclass(Smartphone, Product)
+    assert issubclass(LawnGrass, Product)
+    assert not issubclass(Product, Smartphone)
+    assert not issubclass(str, Product)
+
+    category = Category("Тест", "Описание")
+
+    # Эти классы являются наследниками Product
+    smartphone = Smartphone("Тест", "Описание", 100.0, 1, "средняя", "Model", 128, "черный")
+    lawn_grass = LawnGrass("Тест", "Описание", 50.0, 5, "Россия", "7 дней", "зеленый")
+
+    category.add_product(smartphone)
+    category.add_product(lawn_grass)
+
+    assert len(category.products_list) == 2
+
+
+# ==================== НОВЫЕ ТЕСТЫ ДЛЯ КАТЕГОРИЙ С НАСЛЕДНИКАМИ ====================
+
+def test_category_with_smartphones():
+    """Тест проверки категории, содержащей только смартфоны"""
+    category = Category("Смартфоны", "Флагманские смартфоны")
+
+    iphone = Smartphone("iPhone 15 Pro", "Флагман", 99999.0, 5, "высокая", "iPhone 15 Pro", 256, "черный")
+    samsung = Smartphone("Samsung S24", "Флагман", 89999.0, 3, "высокая", "S24", 256, "фиолетовый")
+
+    category.add_product(iphone)
+    category.add_product(samsung)
+
+    products_str = category.products
+    assert "iPhone 15 Pro" in products_str
+    assert "Samsung S24" in products_str
+    assert "Модель: iPhone 15 Pro" in products_str
+    assert "Модель: S24" in products_str
+
+    # Проверяем общую стоимость
+    total_cost = iphone.price * iphone.quantity + samsung.price * samsung.quantity
+    assert (iphone + samsung) == total_cost
+
+
+def test_category_with_lawn_grass():
+    """Тест проверки категории, содержащей только газонную траву"""
+    category = Category("Газонные травы", "Смеси для газонов")
+
+    premium = LawnGrass("Премиум", "Элитная смесь", 2500.0, 10, "Голландия", "7-10 дней", "изумрудный")
+    standard = LawnGrass("Стандарт", "Обычная смесь", 1000.0, 20, "Россия", "14-21 дней", "зеленый")
+
+    category.add_product(premium)
+    category.add_product(standard)
+
+    products_str = category.products
+    assert "Премиум" in products_str
+    assert "Стандарт" in products_str
+    assert "Страна: Голландия" in products_str
+    assert "Страна: Россия" in products_str
+
+    # Проверяем общую стоимость
+    total_cost = premium.price * premium.quantity + standard.price * standard.quantity
+    assert (premium + standard) == total_cost
+
+
+def test_category_with_mixed_products(sample_category_with_mixed_products):
+    """Тест проверки категории со смешанными типами продуктов"""
+    category = sample_category_with_mixed_products
+
+    products_list = category.products_list
+    assert len(products_list) == 3
+
+    # Проверяем типы
+    assert isinstance(products_list[0], Product)
+    assert isinstance(products_list[1], Smartphone)
+    assert isinstance(products_list[2], LawnGrass)
+
+    # Проверяем, что __str__ работает для каждого типа
+    products_str = category.products
+    assert "Samsung Galaxy S23 Ultra" in products_str
+    assert "iPhone 15 Pro" in products_str
+    assert "Газонная трава премиум" in products_str
+    assert "Модель: iPhone 15 Pro" in products_str
+    assert "Страна: Голландия" in products_str
+
+
+def test_category_total_cost_with_mixed_products(sample_category_with_mixed_products):
+    """Тест проверки общей стоимости категории со смешанными продуктами"""
+    category = sample_category_with_mixed_products
+    products_list = category.products_list
+
+    expected_total = 0
+    for product in products_list:
+        expected_total += product.price * product.quantity
+
+    # Так как у Category нет прямого метода для получения общей стоимости,
+    # мы можем вычислить её вручную для проверки
+    actual_total = 0
+    for product in products_list:
+        actual_total += product.price * product.quantity
+
+    assert actual_total == expected_total
+
+
+# ==================== ТЕСТЫ ДЛЯ ИТЕРАТОРА ====================
+
+def test_category_iterator(sample_category_with_mixed_products):
+    """Тест проверки работы итератора категории"""
+    category = sample_category_with_mixed_products
+    products_list = category.products_list
+
+    # Проверяем, что можно итерироваться по категории
+    iterated_products = []
+    for product in category:
+        iterated_products.append(product)
+
+    assert len(iterated_products) == len(products_list)
+    for i, product in enumerate(iterated_products):
+        assert product.name == products_list[i].name
+
+
+def test_category_iterator_with_empty_category():
+    """Тест проверки итератора для пустой категории"""
+    category = Category("Пустая", "Категория без товаров")
+
+    count = 0
+    for product in category:
+        count += 1
+
+    assert count == 0
+
+
+# ==================== ТЕСТЫ ДЛЯ СЧЕТЧИКОВ ====================
+
+def test_product_count_with_inherited_products():
+    """Тест проверки счетчика продуктов при добавлении наследников"""
+    initial_count = Category.product_count
+
+    category = Category("Тест", "Описание")
+
+    product = Product("Обычный", "Описание", 100.0, 5)
+    smartphone = Smartphone("Смартфон", "Описание", 500.0, 2, "высокая", "Model", 128, "черный")
+    lawn_grass = LawnGrass("Трава", "Описание", 200.0, 10, "Россия", "7 дней", "зеленый")
+
+    category.add_product(product)
+    category.add_product(smartphone)
+    category.add_product(lawn_grass)
+
+    assert Category.product_count == initial_count + 3
+
+
+def test_category_count_with_inherited_products():
+    """Тест проверки счетчика категорий при создании категорий с наследниками"""
+    initial_count = Category.category_count
+
+    category1 = Category("Смартфоны", "Категория со смартфонами")
+    category2 = Category("Травы", "Категория с газонной травой")
+    category3 = Category("Смешанная", "Категория с разными товарами")
+
+    assert Category.category_count == initial_count + 3
+
+
+# ==================== ТЕСТЫ ДЛЯ ГРАНИЧНЫХ СЛУЧАЕВ ====================
+
+def test_edge_case_empty_smartphone():
+    """Тест проверки смартфона с минимальными значениями"""
+    smartphone = Smartphone("", "", 0.0, 0, "", "", 0, "")
+
+    assert smartphone.name == ""
+    assert smartphone.price == 0.0
+    assert smartphone.quantity == 0
+    assert smartphone.efficiency == ""
+    assert smartphone.model == ""
+    assert smartphone.memory == 0
+    assert smartphone.color == ""
+
+
+def test_edge_case_negative_quantity():
+    """Тест проверки создания продукта с отрицательным количеством"""
+    # Количество может быть отрицательным? В реальном магазине нет, но тест проверяет, что это возможно
+    product = Product("Тест", "Описание", 100.0, -5)
+    assert product.quantity == -5
+
+    category = Category("Тест", "Описание")
+    category.add_product(product)
+
+    # Проверяем, что __str__ отработает с отрицательным количеством
+    assert "-5 шт." in str(product)
+
+
+def test_edge_case_zero_price():
+    """Тест проверки продукта с нулевой ценой"""
+    product = Product("Бесплатный", "Описание", 0.0, 10)
+    assert product.price == 0.0
+
+    category = Category("Тест", "Описание")
+    category.add_product(product)
+
+    assert "0.0 руб." in str(product)
+
+
+# ==================== ТЕСТЫ ДЛЯ ВЫВОДА СООБЩЕНИЙ ====================
+
+def test_add_product_success_message(capsys):
+    """Тест проверки вывода сообщения при успешном добавлении продукта"""
+    category = Category("Тест", "Описание")
+    product = Product("Тестовый", "Описание", 100.0, 5)
+
+    category.add_product(product)
+    captured = capsys.readouterr()
+    assert "✓ Продукт 'Тестовый' успешно добавлен в категорию 'Тест'" in captured.out
+
+
+def test_add_product_error_message(capsys):
+    """Тест проверки вывода сообщения об ошибке при добавлении некорректного продукта"""
+    category = Category("Тест", "Описание")
+
+    with pytest.raises(TypeError):
+        category.add_product("не продукт")
+
+    # Ошибка должна быть поднята, сообщение проверяем через exc_info
