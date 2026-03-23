@@ -246,7 +246,7 @@ class Category:
             # Суммируем цены всех товаров
             total_price = sum(product.price for product in self.__products)
             # Вычисляем среднюю цену
-            avg_price = round(total_price / len(self.__products),2)
+            avg_price = round(total_price / len(self.__products), 2)
             return avg_price
         except ZeroDivisionError:
             # Если в категории нет товаров, возвращаем 0

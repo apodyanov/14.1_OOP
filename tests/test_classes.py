@@ -999,7 +999,7 @@ def test_smartphone_creation_zero_quantity_raises_value_error():
             "высокая",
             "iPhone 15 Pro",
             256,
-            "черный"
+            "черный",
         )
 
 
@@ -1013,18 +1013,13 @@ def test_lawn_grass_creation_zero_quantity_raises_value_error():
             0,  # quantity = 0
             "Голландия",
             "10-14 дней",
-            "зеленый"
+            "зеленый",
         )
 
 
 def test_new_product_with_zero_quantity_raises_value_error():
     """Тест: создание продукта через new_product с quantity=0 вызывает ValueError"""
-    product_data = {
-        "name": "Тестовый товар",
-        "description": "Описание",
-        "price": 100.0,
-        "quantity": 0
-    }
+    product_data = {"name": "Тестовый товар", "description": "Описание", "price": 100.0, "quantity": 0}
 
     with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
         Product.new_product(product_data)
@@ -1034,12 +1029,7 @@ def test_add_product_with_check_zero_quantity():
     """Тест: добавление продукта с нулевым количеством через add_product_with_check вызывает ValueError"""
     category = Category("Тест", "Описание")
 
-    product_data = {
-        "name": "Тестовый товар",
-        "description": "Описание",
-        "price": 100.0,
-        "quantity": 0
-    }
+    product_data = {"name": "Тестовый товар", "description": "Описание", "price": 100.0, "quantity": 0}
 
     with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
         category.add_product_with_check(product_data)
@@ -1075,14 +1065,8 @@ def test_category_average_price_single_product():
 
 def test_category_average_price_with_smartphones():
     """Тест: расчет средней цены в категории со смартфонами"""
-    iphone = Smartphone(
-        "iPhone 15 Pro", "Флагман", 99999.0, 5,
-        "высокая", "iPhone 15 Pro", 256, "черный"
-    )
-    samsung = Smartphone(
-        "Samsung S24", "Флагман", 89999.0, 3,
-        "высокая", "S24", 256, "фиолетовый"
-    )
+    iphone = Smartphone("iPhone 15 Pro", "Флагман", 99999.0, 5, "высокая", "iPhone 15 Pro", 256, "черный")
+    samsung = Smartphone("Samsung S24", "Флагман", 89999.0, 3, "высокая", "S24", 256, "фиолетовый")
 
     category = Category("Смартфоны", "Флагманы", [iphone, samsung])
 
@@ -1092,14 +1076,8 @@ def test_category_average_price_with_smartphones():
 
 def test_category_average_price_with_lawn_grass():
     """Тест: расчет средней цены в категории с газонной травой"""
-    premium = LawnGrass(
-        "Премиум", "Элитная смесь", 2500.0, 10,
-        "Голландия", "7-10 дней", "изумрудный"
-    )
-    standard = LawnGrass(
-        "Стандарт", "Обычная смесь", 1000.0, 20,
-        "Россия", "14-21 дней", "зеленый"
-    )
+    premium = LawnGrass("Премиум", "Элитная смесь", 2500.0, 10, "Голландия", "7-10 дней", "изумрудный")
+    standard = LawnGrass("Стандарт", "Обычная смесь", 1000.0, 20, "Россия", "14-21 дней", "зеленый")
 
     category = Category("Газоны", "Смеси", [premium, standard])
 
@@ -1229,14 +1207,8 @@ def test_integration_all_features_together():
     product2 = Product("Мышь", "Беспроводная мышь", 1000.0, 20)
 
     # Создаем смартфоны
-    smartphone1 = Smartphone(
-        "iPhone 15 Pro", "Флагман", 99999.0, 5,
-        "высокая", "iPhone 15 Pro", 256, "черный"
-    )
-    smartphone2 = Smartphone(
-        "Samsung S24", "Флагман", 89999.0, 3,
-        "высокая", "S24", 256, "фиолетовый"
-    )
+    smartphone1 = Smartphone("iPhone 15 Pro", "Флагман", 99999.0, 5, "высокая", "iPhone 15 Pro", 256, "черный")
+    smartphone2 = Smartphone("Samsung S24", "Флагман", 89999.0, 3, "высокая", "S24", 256, "фиолетовый")
 
     # Добавляем все в категорию
     category.add_product(product1)
