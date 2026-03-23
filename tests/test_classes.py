@@ -1043,3 +1043,234 @@ def test_add_product_with_check_zero_quantity():
 
     with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
         category.add_product_with_check(product_data)
+
+
+def test_category_average_price_with_products():
+    """Тест: расчет средней цены в категории с товарами"""
+    product1 = Product("Товар 1", "Описание", 100.0, 10)
+    product2 = Product("Товар 2", "Описание", 200.0, 5)
+    product3 = Product("Товар 3", "Описание", 300.0, 8)
+
+    category = Category("Тест", "Описание", [product1, product2, product3])
+
+    expected_average = (100.0 + 200.0 + 300.0) / 3
+    assert category.middle_price() == expected_average
+
+
+def test_category_average_price_empty_category():
+    """Тест: расчет средней цены в пустой категории должен вернуть 0"""
+    category = Category("Пустая", "Категория без товаров")
+
+    # Не должно быть исключения, должно вернуться 0
+    assert category.middle_price() == 0
+
+
+def test_category_average_price_single_product():
+    """Тест: расчет средней цены в категории с одним товаром"""
+    product = Product("Товар", "Описание", 150.0, 10)
+    category = Category("Тест", "Описание", [product])
+
+    assert category.middle_price() == 150.0
+
+
+def test_category_average_price_with_smartphones():
+    """Тест: расчет средней цены в категории со смартфонами"""
+    iphone = Smartphone(
+        "iPhone 15 Pro", "Флагман", 99999.0, 5,
+        "высокая", "iPhone 15 Pro", 256, "черный"
+    )
+    samsung = Smartphone(
+        "Samsung S24", "Флагман", 89999.0, 3,
+        "высокая", "S24", 256, "фиолетовый"
+    )
+
+    category = Category("Смартфоны", "Флагманы", [iphone, samsung])
+
+    expected_average = (99999.0 + 89999.0) / 2
+    assert category.middle_price() == expected_average
+
+
+def test_category_average_price_with_lawn_grass():
+    """Тест: расчет средней цены в категории с газонной травой"""
+    premium = LawnGrass(
+        "Премиум", "Элитная смесь", 2500.0, 10,
+        "Голландия", "7-10 дней", "изумрудный"
+    )
+    standard = LawnGrass(
+        "Стандарт", "Обычная смесь", 1000.0, 20,
+        "Россия", "14-21 дней", "зеленый"
+    )
+
+    category = Category("Газоны", "Смеси", [premium, standard])
+
+    expected_average = (2500.0 + 1000.0) / 2
+    assert category.middle_price() == expected_average
+
+
+def test_category_average_price_with_mixed_products(sample_category_with_mixed_products):
+    """Тест: расчет средней цены в категории со смешанными типами продуктов"""
+    category = sample_category_with_mixed_products
+    products_list = category.products_list
+
+    # Вычисляем среднюю цену вручную
+    total_price = sum(product.price for product in products_list)
+    expected_average = total_price / len(products_list)
+
+    assert category.middle_price() == expected_average
+
+
+def test_category_average_price_after_adding_products():
+    """Тест: расчет средней цены после добавления новых товаров"""
+    category = Category("Тест", "Описание")
+
+    # Пустая категория
+    assert category.middle_price() == 0
+
+    # Добавляем первый товар
+    product1 = Product("Товар 1", "Описание", 100.0, 10)
+    category.add_product(product1)
+    assert category.middle_price() == 100.0
+
+    # Добавляем второй товар
+    product2 = Product("Товар 2", "Описание", 200.0, 5)
+    category.add_product(product2)
+    assert category.middle_price() == 150.0
+
+    # Добавляем третий товар
+    product3 = Product("Товар 3", "Описание", 300.0, 8)
+    category.add_product(product3)
+    assert category.middle_price() == 200.0
+
+
+def test_category_average_price_with_duplicate_products():
+    """Тест: расчет средней цены при наличии дубликатов товаров"""
+    product1 = Product("Товар", "Описание", 100.0, 10)
+    product2 = Product("Товар", "Описание", 200.0, 5)  # Товар с таким же именем, но другой ценой
+
+    category = Category("Тест", "Описание", [product1, product2])
+
+    # Оба товара учитываются отдельно
+    expected_average = (100.0 + 200.0) / 2
+    assert category.middle_price() == expected_average
+
+
+def test_category_average_price_with_zero_priced_products():
+    """Тест: расчет средней цены, если некоторые товары имеют нулевую цену"""
+    product1 = Product("Бесплатный", "Описание", 0.0, 10)
+    product2 = Product("Платный", "Описание", 200.0, 5)
+    product3 = Product("Дорогой", "Описание", 1000.0, 8)
+
+    category = Category("Тест", "Описание", [product1, product2, product3])
+
+    expected_average = (0.0 + 200.0 + 1000.0) / 3
+    assert category.middle_price() == expected_average
+
+
+def test_category_average_price_after_removing_products():
+    """Тест: расчет средней цены после удаления товаров (хотя в классе нет метода удаления,
+    но можно проверить через создание новой категории)"""
+    product1 = Product("Товар 1", "Описание", 100.0, 10)
+    product2 = Product("Товар 2", "Описание", 200.0, 5)
+    product3 = Product("Товар 3", "Описание", 300.0, 8)
+
+    category1 = Category("Тест", "Описание", [product1, product2, product3])
+    assert category1.middle_price() == 200.0
+
+    category2 = Category("Тест", "Описание", [product1, product3])
+    assert category2.middle_price() == 200.0  # (100 + 300) / 2 = 200
+
+    category3 = Category("Тест", "Описание", [product1])
+    assert category3.middle_price() == 100.0
+
+    category4 = Category("Тест", "Описание", [])
+    assert category4.middle_price() == 0
+
+
+def test_category_average_price_does_not_affect_original_products(sample_category_with_mixed_products):
+    """Тест: проверка, что метод average_price() не изменяет исходные данные"""
+    category = sample_category_with_mixed_products
+    original_products = category.products_list.copy()
+    original_prices = [product.price for product in original_products]
+
+    # Вызываем метод average_price()
+    avg = category.middle_price()
+
+    # Проверяем, что данные не изменились
+    assert len(category.products_list) == len(original_products)
+    for i, product in enumerate(category.products_list):
+        assert product.price == original_prices[i]
+
+    # Проверяем, что средняя цена вычислена корректно
+    assert avg == sum(original_prices) / len(original_products)
+
+
+def test_category_average_price_type():
+    """Тест: проверка, что метод average_price() возвращает число (int или float)"""
+    category_empty = Category("Пустая", "Описание")
+    assert isinstance(category_empty.middle_price(), (int, float))
+
+    product = Product("Товар", "Описание", 100, 10)
+    category_with_product = Category("Тест", "Описание", [product])
+    assert isinstance(category_with_product.middle_price(), (int, float))
+
+    # Цены с плавающей точкой
+    product_float = Product("Товар", "Описание", 100.5, 10)
+    category_with_float = Category("Тест", "Описание", [product_float])
+    assert isinstance(category_with_float.middle_price(), float)
+
+
+def test_integration_all_features_together():
+    """Полный интеграционный тест: проверка работы всей функциональности вместе"""
+    # Создаем категорию
+    category = Category("Электроника", "Электронные товары")
+
+    # Создаем обычные товары
+    product1 = Product("Ноутбук", "Мощный ноутбук", 50000.0, 10)
+    product2 = Product("Мышь", "Беспроводная мышь", 1000.0, 20)
+
+    # Создаем смартфоны
+    smartphone1 = Smartphone(
+        "iPhone 15 Pro", "Флагман", 99999.0, 5,
+        "высокая", "iPhone 15 Pro", 256, "черный"
+    )
+    smartphone2 = Smartphone(
+        "Samsung S24", "Флагман", 89999.0, 3,
+        "высокая", "S24", 256, "фиолетовый"
+    )
+
+    # Добавляем все в категорию
+    category.add_product(product1)
+    category.add_product(product2)
+    category.add_product(smartphone1)
+    category.add_product(smartphone2)
+
+    # Проверяем количество товаров
+    assert len(category.products_list) == 4
+
+    # Проверяем общее количество продуктов (сумма quantity)
+    total_quantity = sum(p.quantity for p in category.products_list)
+    assert total_quantity == 10 + 20 + 5 + 3  # 38
+
+    # Проверяем среднюю цену
+    expected_avg = (50000.0 + 1000.0 + 99999.0 + 89999.0) / 4
+    assert category.middle_price() == expected_avg
+
+    # Проверяем строковое представление категории
+    assert str(category) == f"Электроника, количество продуктов: {total_quantity} шт."
+
+    # Проверяем, что нельзя создать товар с нулевым количеством
+    with pytest.raises(ValueError):
+        Product("Нулевой", "Описание", 100.0, 0)
+
+    # Проверяем, что средняя цена после невозможного добавления не изменилась
+    assert category.middle_price() == expected_avg
+
+    # Проверяем итерацию по категории
+    product_names = []
+    for product in category:
+        product_names.append(product.name)
+
+    assert "Ноутбук" in product_names
+    assert "Мышь" in product_names
+    assert "iPhone 15 Pro" in product_names
+    assert "Samsung S24" in product_names
