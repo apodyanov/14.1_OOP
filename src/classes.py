@@ -30,6 +30,11 @@ class Product(LogMixin, BaseProduct):
 
     def __init__(self, name: str, description: str, price: float, quantity: int, *args, **kwargs):
         """Метод для инициализации экземпляра класса Product"""
+
+        # Проверка на нулевое количество
+        if quantity == 0:
+            raise ValueError("Товар с нулевым количеством не может быть добавлен")
+
         super().__init__(name, description, price, quantity, *args, **kwargs)
         self.name = name
         self.description = description
@@ -229,6 +234,23 @@ class Category:
 
         # Увеличиваем счетчик товаров на количество товаров в категории
         Category.product_count += len(self.__products)
+
+    def middle_price(self):
+        """
+        Метод для подсчета средней цены всех товаров в категории.
+
+        Returns:
+            float: Средняя цена товаров в категории. Если в категории нет товаров, возвращает 0.
+        """
+        try:
+            # Суммируем цены всех товаров
+            total_price = sum(product.price for product in self.__products)
+            # Вычисляем среднюю цену
+            avg_price = round(total_price / len(self.__products),2)
+            return avg_price
+        except ZeroDivisionError:
+            # Если в категории нет товаров, возвращаем 0
+            return 0
 
     def __str__(self):
         """
