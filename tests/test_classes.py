@@ -653,11 +653,11 @@ def test_category_count_with_inherited_products():
 
 def test_edge_case_empty_smartphone():
     """Тест проверки смартфона с минимальными значениями"""
-    smartphone = Smartphone("", "", 0.0, 0, "", "", 0, "")
+    smartphone = Smartphone("", "", 0.0, 1, "", "", 0, "")
 
     assert smartphone.name == ""
     assert smartphone.price == 0.0
-    assert smartphone.quantity == 0
+    assert smartphone.quantity == 1
     assert smartphone.efficiency == ""
     assert smartphone.model == ""
     assert smartphone.memory == 0
@@ -913,9 +913,9 @@ def test_log_mixin_handles_all_argument_types(capsys):
     assert "Product('Тест4', 'Описание4', -50.0, -3)" in captured.out
 
     # Ноль
-    product5 = Product("Тест5", "Описание5", 0, 0)
+    product5 = Product("Тест5", "Описание5", 0, 1)
     captured = capsys.readouterr()
-    assert "Product('Тест5', 'Описание5', 0, 0)" in captured.out
+    assert "Product('Тест5', 'Описание5', 0, 1)" in captured.out
 
 
 def test_log_mixin_output_with_newline_characters(capsys):
@@ -958,3 +958,88 @@ def test_log_mixin_inheritance_chain():
     assert LogMixin in Product.__mro__
     assert LogMixin in Smartphone.__mro__
     assert LogMixin in LawnGrass.__mro__
+
+
+# ==================== НОВЫЕ ТЕСТЫ ДЛЯ ЗАДАНИЯ 17.1 ====================
+# Проверка исключения ValueError при создании товара с нулевым количеством
+
+
+def test_product_creation_zero_quantity_raises_value_error():
+    """Тест: при создании Product с quantity=0 вызывается ValueError с правильным сообщением"""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product("Тестовый товар", "Описание", 100.0, 0)
+
+
+def test_product_creation_positive_quantity_success():
+    """Тест: создание Product с положительным количеством не вызывает исключение"""
+    try:
+        product = Product("Тестовый товар", "Описание", 100.0, 5)
+        assert product.quantity == 5
+    except ValueError:
+        pytest.fail("ValueError не должен вызываться при положительном количестве")
+
+
+def test_product_creation_negative_quantity_success():
+    """Тест: создание Product с отрицательным количеством не вызывает исключение (по заданию проверяем только ноль)"""
+    try:
+        product = Product("Тестовый товар", "Описание", 100.0, -5)
+        assert product.quantity == -5
+    except ValueError:
+        pytest.fail("ValueError не должен вызываться при отрицательном количестве")
+
+
+def test_smartphone_creation_zero_quantity_raises_value_error():
+    """Тест: при создании Smartphone с quantity=0 вызывается ValueError"""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Smartphone(
+            "iPhone 15 Pro",
+            "Флагманский смартфон",
+            99999.0,
+            0,  # quantity = 0
+            "высокая",
+            "iPhone 15 Pro",
+            256,
+            "черный"
+        )
+
+
+def test_lawn_grass_creation_zero_quantity_raises_value_error():
+    """Тест: при создании LawnGrass с quantity=0 вызывается ValueError"""
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        LawnGrass(
+            "Газонная трава премиум",
+            "Смесь для идеального газона",
+            1500.0,
+            0,  # quantity = 0
+            "Голландия",
+            "10-14 дней",
+            "зеленый"
+        )
+
+
+def test_new_product_with_zero_quantity_raises_value_error():
+    """Тест: создание продукта через new_product с quantity=0 вызывает ValueError"""
+    product_data = {
+        "name": "Тестовый товар",
+        "description": "Описание",
+        "price": 100.0,
+        "quantity": 0
+    }
+
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        Product.new_product(product_data)
+
+
+def test_add_product_with_check_zero_quantity():
+    """Тест: добавление продукта с нулевым количеством через add_product_with_check вызывает ValueError"""
+    category = Category("Тест", "Описание")
+
+    product_data = {
+        "name": "Тестовый товар",
+        "description": "Описание",
+        "price": 100.0,
+        "quantity": 0
+    }
+
+    with pytest.raises(ValueError, match="Товар с нулевым количеством не может быть добавлен"):
+        category.add_product_with_check(product_data)
